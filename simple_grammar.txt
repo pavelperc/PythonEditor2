@@ -1,0 +1,31 @@
+file_input: (NEWLINE | stmt)* ENDMARKER
+
+stmt: expr_stmt NEWLINE
+
+expr_stmt: test (augassign test | ('=' test)*)
+
+augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '**=' | '//=')
+
+
+test: or_test
+
+or_test: and_test ('or' and_test)*
+and_test: not_test ('and' not_test)*
+not_test: 'not' not_test | comparison
+comparison: expr (comp_op expr)*
+
+
+comp_op: '<'|'>'|'=='|'>='|'<='|'!='
+
+expr: term (('+'|'-') term)*
+term: factor (('*'|'/'|'%'|'//') factor)*
+factor: ('+'|'-'|'~') factor | power
+power: atom_expr ['**' factor]
+atom_expr: atom trailer*
+atom: ('(' [test] ')' |
+       '[' [test] ']' |
+       NAME | NUMBER | STRING+ | 'None' | 'True' | 'False')
+
+trailer: '(' [arglist] ')' | '[' test ']' | '.' NAME
+
+arglist: test (',' test)*  [',']

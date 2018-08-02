@@ -1,0 +1,3 @@
+rootProject.name = 'PythonEditor2'
+include 'TreeBuilder'
+

@@ -1,0 +1,2 @@
+stmt: NAME ('=' | '+=') expr ('+' expr)* [';']
+expr: NAME | NUMBER
