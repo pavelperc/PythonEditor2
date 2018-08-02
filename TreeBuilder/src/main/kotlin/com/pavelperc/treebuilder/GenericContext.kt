@@ -100,7 +100,7 @@ class GenericContextNewline(element: GenericElementLeaf) : GenericContextId(elem
         count += context.indentTokens.size
         count -= context.dedentTokens.size
         
-        log?.println("found $count indents for newline")
+        Log.println("found $count indents for newline")
         return count
     }
     
@@ -114,14 +114,14 @@ class GenericContextNewline(element: GenericElementLeaf) : GenericContextId(elem
             }
     
     fun addIndentOrDedentToken(context: Context, token: ElementLeaf) {
-        log?.println("in addIndentOrDedentToken in $context")
+        Log.println("in addIndentOrDedentToken in $context")
         
         when (token.gElement.text) {
             "INDENT" -> context.indentTokens.add(token)
             "DEDENT" -> context.dedentTokens.add(token)
             else -> throw Exception("tried to add not indent or dedent element to context")
         }
-        log?.println("indentTokens.size = ${context.indentTokens.size}, " +
+        Log.println("indentTokens.size = ${context.indentTokens.size}, " +
                 "dedentTokens.size = ${context.dedentTokens.size}")
     }
     
@@ -162,7 +162,7 @@ class GenericContextAssign(element: GenericElementLeaf) : GenericContextLeaf(ele
         val gCtxName = ctxName?.gContext
         
         if (ctxName == null || gCtxName !is GenericContextName) {
-            log?.println("in onChoose for Assign: not found name before assign. found: $ctxName")
+            Log.println("in onChoose for Assign: not found name before assign. found: $ctxName")
 //            throw Exception("not found name before assign. found: $ctxName")
             return
         }
@@ -251,7 +251,7 @@ class GenericContextName(
     fun updateAssignmentInStmt(ctx: ContextLeaf) {
         
         if (ctx.rightLeafStep.go()?.gContext !is GenericContextAssign) {
-            log?.println("in updateAssign for NAME: not found '=' at the right of $ctx but found ${ctx.rightLeafStep.go()}")
+            Log.println("in updateAssign for NAME: not found '=' at the right of $ctx but found ${ctx.rightLeafStep.go()}")
             return
         }
         
@@ -262,7 +262,7 @@ class GenericContextName(
         
         gStmtCtx.putAssignment(stmtCtx, ctx.element.realizedToken!!)
         
-        log?.println("in updateAssign for NAME: succeed}")
+        Log.println("in updateAssign for NAME: succeed}")
     
     }
 }

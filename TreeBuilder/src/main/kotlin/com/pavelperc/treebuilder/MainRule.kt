@@ -29,7 +29,7 @@ abstract class MainRule(gRule: GenericRule, ruleMap: Map<String, GenericRule>) :
             // теперь идём вниз либо по чужим правилам либо по нашему правилу
             ans = ans.alteration.concatenations[0].repetitions[0].firstElement
         }
-        log?.println("setup first currentElement: " + ans.gElement)
+        Log.println("setup first currentElement: " + ans.gElement)
         return ans as ElementLeaf
     }
     
@@ -60,7 +60,7 @@ abstract class MainRule(gRule: GenericRule, ruleMap: Map<String, GenericRule>) :
         }
         
         currentElement?.apply {
-            log?.println("found new currentElement: $gElement : ${thisRule.gRule.id}")
+            Log.println("found new currentElement: $gElement : ${thisRule.gRule.id}")
         }
         
         val alternatives = currentElement?.findAlternativesUp(false) ?: emptyList()
@@ -91,7 +91,7 @@ abstract class MainRule(gRule: GenericRule, ruleMap: Map<String, GenericRule>) :
     
     /** Updates tree. Connects [leftLeaf] with [chosen]*/
     fun build(leftLeaf: ElementLeaf?, chosen: ElementLeaf) {
-        log?.println("----------IN BUILD----------")
+        Log.println("----------IN BUILD----------")
         
         chosen.updateAllChosen()
 
@@ -100,7 +100,7 @@ abstract class MainRule(gRule: GenericRule, ruleMap: Map<String, GenericRule>) :
         // connect with previous
         leftLeaf?.rightLeaf = chosen;
         chosen.leftLeaf = leftLeaf;
-        log?.println("In Build: connected '$chosen' with '$leftLeaf'")
+        Log.println("In Build: connected '$chosen' with '$leftLeaf'")
         
         
         chosen.gContext.also {

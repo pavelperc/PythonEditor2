@@ -171,7 +171,7 @@ abstract class Context(open val element: Element) {
         
         /** public wrapper of [oneStep]. Returns context of next step.*/
         open fun go(): Context? = ctx.oneStep()
-                .also { log?.println("after ${this::class.java.simpleName}: ${ctx} to $it") }
+                .also { Log.println("after ${this::class.java.simpleName}: ${ctx} to $it") }
         
         /** Lazy generation of list with elements in given direction.*/
         open fun asSequence() = Sequence<Context> {
@@ -190,7 +190,7 @@ abstract class Context(open val element: Element) {
                         hasCashedNext = true
                     }
                     
-                    log?.println("after hasNext in ${this@Step::class.java.simpleName}: $curr to $cashedNext")
+                    Log.println("after hasNext in ${this@Step::class.java.simpleName}: $curr to $cashedNext")
                     
                     return cashedNext != null
                 }
@@ -275,7 +275,7 @@ class ContextLeaf(override val element: ElementLeaf) : Context(element) {
         
         /** public wrapper of [oneStep]. Returns [ContextLeaf] of next step.*/
         override fun go(): ContextLeaf? = (super.go() as ContextLeaf?)
-                .also { log?.println("after StepLeaf: ${this::class.java.simpleName}: ${ctx} to $it") }
+                .also { Log.println("after StepLeaf: ${this::class.java.simpleName}: ${ctx} to $it") }
         
         
         override fun asSequence() = super.asSequence().map { it as ContextLeaf }

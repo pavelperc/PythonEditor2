@@ -421,7 +421,7 @@ open class RealizedRule(
                     // we are unrealized leaf
                     false
                 }.also { bool ->
-                    log?.println("isOptional is $bool for $gElement")
+                    Log.println("isOptional is $bool for $gElement")
                 }
         
         /** Проверка есть ли в ветви с текущем элементом хоть один реализованный лист. (включая себя)  */
@@ -496,7 +496,7 @@ open class RealizedRule(
             }
             // если мы последний нереализованный
             val ans = isEmpty && positionInFather == father.realizedElements.size
-            log?.println("in isRightOptional in $this: I am empty, return $ans")
+            Log.println("in isRightOptional in $this: I am empty, return $ans")
             return ans
             
         }
@@ -527,7 +527,7 @@ open class RealizedRule(
          * @return список всех элементов вместе с текущим, если он простой
          */
         fun findAlternativesUp(wantAlternatives: Boolean): List<ElementLeaf> {
-            log?.println("findAlternativesUp($wantAlternatives) in $gElement")
+            Log.println("findAlternativesUp($wantAlternatives) in $gElement")
             
             val alternatives = mutableListOf<ElementLeaf>()
             
@@ -551,7 +551,7 @@ open class RealizedRule(
             // если мы первые нереализованные в rep и rep первый в conc
             // то проходим по  всем alteration
             if (positionInFather == 0 && isEmpty && father.positionInFather == 0) {
-                log?.println("findAlternativesUp: check alterations")
+                Log.println("findAlternativesUp: check alterations")
                 
                 for (conc in father.father.father.concatenations) {
                     if (conc === father.father)
@@ -580,7 +580,7 @@ open class RealizedRule(
          * Если сложный - то ищем все подходящие листы внизу.
          */
         fun findAlternativesDown(): List<ElementLeaf> {
-            log?.println("findAlternativesDown in " + gElement + " : " + thisRule.gRule.id)
+            Log.println("findAlternativesDown in " + gElement + " : " + thisRule.gRule.id)
             
             if (this is ElementLeaf) {
                 return listOf(this)
@@ -595,7 +595,7 @@ open class RealizedRule(
         
         /** Обновляет все значения выбранных alt, rep count, если текущий элемент выбран  */
         fun updateAllChosen() {
-            log?.println("updateAllChosen in $gElement")
+            Log.println("updateAllChosen in $gElement")
             if (isEmpty) {// если rep не выбран - выбираем
                 father.insertNewRealized(this, positionInFather)
                 isEmpty = false
@@ -617,7 +617,7 @@ open class RealizedRule(
                 throw Exception("tried to find new current from not realized element. (findAlternatives before build)")
 
 
-//            log?.println("in findNewCurrent in $gElement");
+//            Log.println("in findNewCurrent in $gElement");
             // если у отца элемента (необязательно листа) есть * или +
             // возвращаем новый пустой элемент справа от себя
             if (!father.isFull) {

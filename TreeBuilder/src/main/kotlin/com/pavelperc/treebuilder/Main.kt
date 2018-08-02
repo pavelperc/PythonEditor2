@@ -7,11 +7,8 @@ import java.io.FileReader
  */
 fun main(args: Array<String>) {
     
-    log = object : Log {
-        override fun println(str: Any) {
-            kotlin.io.println(str)
-        }
-    }
+    Log.logPrinter = { any -> println(any)}
+    
     
     println("Working Directory = ${System.getProperty("user.dir")}")
 //    val grammar = FileReader("app/src/main/res/raw/full_grammar.txt").readText()
