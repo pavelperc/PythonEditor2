@@ -1,6 +1,9 @@
 package com.pavelperc.treebuilder
 
 import com.pavelperc.treebuilder.grammar.GenericRule
+import com.pavelperc.treebuilder.tree.ElementLeaf
+import com.pavelperc.treebuilder.tree.ElementNode
+import com.pavelperc.treebuilder.tree.RealizedRule
 
 /**
  * Расширение для RealizedRule.
@@ -62,7 +65,7 @@ abstract class MainRule(gRule: GenericRule, ruleMap: Map<String, GenericRule>) :
         }
         
         currentElement?.apply {
-            Log.println("found new currentElement: $gElement : ${thisRule.gRule.id}")
+            Log.println("found new currentElement: $gElement : ${rule.gRule.id}")
         }
         
         val alternatives = currentElement?.findAlternativesUp(false) ?: emptyList()

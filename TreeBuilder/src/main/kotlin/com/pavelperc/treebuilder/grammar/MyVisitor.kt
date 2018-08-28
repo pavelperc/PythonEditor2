@@ -2,15 +2,12 @@ package com.pavelperc.treebuilder.grammar
 
 
 // все статические вложенные классы для GenericRule
-import com.pavelperc.treebuilder.graphviz.Graph
 import com.pavelperc.treebuilder.abnf.AbnfBaseListener
 import com.pavelperc.treebuilder.abnf.AbnfBaseVisitor
 import com.pavelperc.treebuilder.abnf.AbnfLexer
 import com.pavelperc.treebuilder.abnf.AbnfParser
 import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream
-import java.util.*
-import com.pavelperc.treebuilder.grammar.GrammarOptimizer.reduceGroups
 
 typealias MutableRuleMap = MutableMap<String, GenericRule>
 
@@ -35,108 +32,28 @@ object MyVisitor {
         val ruleListVisitor = RuleListVisitor()
         
         val ruleMap = ruleListVisitor.visitRulelist(parser.rulelist())
+        
+        checkParserRuleNames(ruleMap)
+        
         return ruleMap
     }
     
-    
-    /**
-     * Replaces all rules with groups if they occur only once.
-     * Removes unused rules.
-     * And simplifies groups like this:
-     * 
-     * (a | b) | c -> a | b | c
-     *
-     * (a | b) c* -> a c* | b c*
-     */
-    fun optimizeRuleMap(ruleMap: MutableRuleMap) {
-        
-        val usagesMap = mutableMapOf<GenericRule, Int>()
-        
-        for (rule in ruleMap.values) {
-            usagesMap[rule] = 0
-        }
-        
-        
-        // заполняем количество использований правил
-        for (rule in ruleMap.values) {
-            val leaves = rule.leaves
-            for (leaf in leaves) {
-                
-                // листы, имена которых есть в списке правил
-                if (ruleMap.contains(leaf.text)) {
-                    // то правило, на которое ссылается ребёнок
-                    val childRule = ruleMap[leaf.text]!!
-                    
-                    usagesMap[childRule] = usagesMap[childRule]!! + 1
+    /** Checks if all parser rule names (lowercase) are contained in the ruleMap*/
+    private fun checkParserRuleNames(ruleMap: MutableRuleMap) {
+        ruleMap.values
+                .forEach { rule ->
+                    rule.leaves
+                            .filter { it.isParserRuleId }
+                            .forEach {
+                                if (!ruleMap.containsKey(it.text))
+                                    throw IllegalArgumentException("Rule ${rule.id} has lowerCase leaf element ${it.text}, " +
+                                            "which is not const and not parser rule (type is ${it.elementType}! " +
+                                            "All lexer rules should be upperCase!")
+                            }
                 }
-            }
-        }
-
-//        usagesMap.forEach { key, value ->
-//            println("${key.id}: $value")
-//        }
         
-        val forRemoval = mutableListOf<GenericRule>()
-        
-        // заменяем все правила на группы, если они встречаются не более 1 раза
-        for (rule in ruleMap.values) {
-            val leaves = rule.leaves
-            for (leaf in leaves) {
-                // листы, имена которых есть в списке правил (то есть правила)
-                if (ruleMap.containsKey(leaf.text)) {
-                    // то правило, на которое ссылается ребёнок
-                    val childRule = ruleMap[leaf.text]!!
-                    
-                    // избегаем рекурсии
-                    if (childRule === rule)
-                        continue
-
-
-//                    if (childRule.gAlteration.let { 
-//                                it.gConcatenations.size == 1 
-//                            && it.gConcatenations[0].gRepetitions.size == 1}) {
-//                        
-//                        childRule.gAlteration.gConcatenations[0].gRepetitions[0].gElement.also {
-//                            if (it is GenericElementLeaf) {
-//                                // всё скопировать
-//                            }
-//                        }
-//                                    
-//                    }
-                    
-                    if (usagesMap[childRule]!! <= 1) {
-//                        log?.println("attached: ${rule.id} <-- ${childRule.id}")
-                        // осздаём новую группу вместо листа
-                        // внутри конструктора у childRule.gAlteration появляется отец
-                        val newNode = GenericElementNode(childRule.gAlteration, false);
-                        
-                        // искать usages <= 2, то может присвоиться одно и то же gAlteration двум вершинам
-                        
-                        // связываем отца и сына
-                        newNode.father = leaf.father
-                        leaf.father!!.gElement = newNode
-                        
-                        // уменьшаем количество использований правила
-                        usagesMap[childRule] = usagesMap[childRule]!! - 1
-                        
-                        // очищаем ненужные правила
-                        if (usagesMap[childRule]!! <= 0) {
-                            usagesMap.remove(childRule)
-                            forRemoval.add(childRule)
-                        }
-                    }
-                }
-            }
-        }
-        
-        forRemoval.forEach { rule -> ruleMap.remove(rule.id) }
-        
-        
-        
-        for (rule in ruleMap.values) {
-            rule.gAlteration.reduceGroups()
-        }
     }
+    
     
     /**
      * Визитор для списка правил.

@@ -1,8 +1,8 @@
 package com.pavelperc.treebuilder
 
-import com.pavelperc.treebuilder.RealizedRule.Element
-import com.pavelperc.treebuilder.RealizedRule.ElementLeaf
-import com.pavelperc.treebuilder.RealizedRule.ElementNode
+import com.pavelperc.treebuilder.tree.Element
+import com.pavelperc.treebuilder.tree.ElementLeaf
+import com.pavelperc.treebuilder.tree.ElementNode
 
 /**
  * It is responsible for navigating through the syntax tree. (Mostly amoung Chosen elements).
@@ -128,7 +128,7 @@ abstract class Context(open val element: Element) {
                 this.leftStep.go() ?: run {
                     // move left in upper level of the tree while we can't return down to this level of tree
                     var leftAbove = upStep.go()?.oneStep()// recursive call for upper element
-                    while (leftAbove != null && leftAbove.element is RealizedRule.ElementLeaf) {
+                    while (leftAbove != null && leftAbove.element is ElementLeaf) {
                         leftAbove = leftAbove.oneStep()
                     }
                     // here leftAbove is either null or context of ElementNode with realized concs

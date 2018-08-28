@@ -10,7 +10,7 @@ object GrammarOptimizer {
      *
      * (a | b) c* -> a c* | b c*
      * */
-    fun GenericAlteration.reduceGroups() {
+    private fun GenericAlteration.reduceGroups() {
         // conc to remove from gConcs or add
         val forRemoval = ArrayList<GenericConcatenation>()
         val forAddition = ArrayList<GenericConcatenation>()
@@ -88,6 +88,106 @@ object GrammarOptimizer {
                     rep.gElementNode.gAlteration.reduceGroups()
                 }
             }
+        }
+    }
+    
+    
+    /**
+     * Replaces all rules with groups if they occur only once.
+     * Removes unused rules.
+     * And simplifies groups like this:
+     *
+     * (a | b) | c -> a | b | c
+     *
+     * (a | b) c* -> a c* | b c*
+     */
+    fun optimizeRuleMap(ruleMap: MutableRuleMap) {
+        
+        val usagesMap = mutableMapOf<GenericRule, Int>()
+        
+        for (rule in ruleMap.values) {
+            usagesMap[rule] = 0
+        }
+        
+        
+        // заполняем количество использований правил
+        for (rule in ruleMap.values) {
+            val leaves = rule.leaves
+            for (leaf in leaves) {
+                
+                // листы, имена которых есть в списке правил
+                if (ruleMap.contains(leaf.text)) {
+                    // то правило, на которое ссылается ребёнок
+                    val childRule = ruleMap[leaf.text]!!
+                    
+                    usagesMap[childRule] = usagesMap[childRule]!! + 1
+                }
+            }
+        }
+
+//        usagesMap.forEach { key, value ->
+//            println("${key.id}: $value")
+//        }
+        
+        val forRemoval = mutableListOf<GenericRule>()
+        
+        // заменяем все правила на группы, если они встречаются не более 1 раза
+        for (rule in ruleMap.values) {
+            val leaves = rule.leaves
+            for (leaf in leaves) {
+                // листы, имена которых есть в списке правил (то есть правила)
+                if (ruleMap.containsKey(leaf.text)) {
+                    // то правило, на которое ссылается ребёнок
+                    val childRule = ruleMap[leaf.text]!!
+                    
+                    // избегаем рекурсии
+                    if (childRule === rule)
+                        continue
+
+
+//                    if (childRule.gAlteration.let { 
+//                                it.gConcatenations.size == 1 
+//                            && it.gConcatenations[0].gRepetitions.size == 1}) {
+//                        
+//                        childRule.gAlteration.gConcatenations[0].gRepetitions[0].gElement.also {
+//                            if (it is GenericElementLeaf) {
+//                                // всё скопировать
+//                            }
+//                        }
+//                                    
+//                    }
+                    
+                    if (usagesMap[childRule]!! <= 1) {
+//                        log?.println("attached: ${rule.id} <-- ${childRule.id}")
+                        // осздаём новую группу вместо листа
+                        // внутри конструктора у childRule.gAlteration появляется отец
+                        val newNode = GenericElementNode(childRule.gAlteration, false);
+                        
+                        // искать usages <= 2, то может присвоиться одно и то же gAlteration двум вершинам
+                        
+                        // связываем отца и сына
+                        newNode.father = leaf.father
+                        leaf.father!!.gElement = newNode
+                        
+                        // уменьшаем количество использований правила
+                        usagesMap[childRule] = usagesMap[childRule]!! - 1
+                        
+                        // очищаем ненужные правила
+                        if (usagesMap[childRule]!! <= 0) {
+                            usagesMap.remove(childRule)
+                            forRemoval.add(childRule)
+                        }
+                    }
+                }
+            }
+        }
+        
+        forRemoval.forEach { rule -> ruleMap.remove(rule.id) }
+        
+        
+        
+        for (rule in ruleMap.values) {
+            rule.gAlteration.reduceGroups()
         }
     }
 

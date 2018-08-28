@@ -1,5 +1,6 @@
 package com.pavelperc.treebuilder
 
+import com.pavelperc.treebuilder.grammar.GrammarOptimizer
 import com.pavelperc.treebuilder.grammar.MyVisitor
 import com.pavelperc.treebuilder.grammar.RuleMap
 import com.pavelperc.treebuilder.graphviz.GenericRulesDrawer
@@ -191,7 +192,7 @@ enum class Palette(colorString: String) {
 //    
 //    
 //    if (drawGV) MyVisitor.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules")
-//    if (optimizeRules) MyVisitor.optimizeRuleMap(ruleMap)
+//    if (optimizeRules) GrammarOptimizer.optimizeRuleMap(ruleMap)
 //    if (drawGV && optimizeRules) MyVisitor.drawGv(ruleMap, "chains/GenericRulesOptimized.gv", "optimized rules")
 //    
 //    return ruleMap
@@ -358,8 +359,8 @@ fun setupFullGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boo
         GenericRulesDrawer.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules: ${ruleMap.size}")
     }
     if (optimizeRules) {
-        MyVisitor.optimizeRuleMap(ruleMap)
-        MyVisitor.optimizeRuleMap(ruleMap)
+        GrammarOptimizer.optimizeRuleMap(ruleMap)
+        GrammarOptimizer.optimizeRuleMap(ruleMap)
         
         if (drawGV)
             GenericRulesDrawer.drawGv(ruleMap,
@@ -385,8 +386,8 @@ fun setupSmallGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Bo
         GenericRulesDrawer.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules: ${ruleMap.size}")
     }
     if (optimizeRules) {
-        MyVisitor.optimizeRuleMap(ruleMap)
-        MyVisitor.optimizeRuleMap(ruleMap)
+        GrammarOptimizer.optimizeRuleMap(ruleMap)
+        GrammarOptimizer.optimizeRuleMap(ruleMap)
         
         if (drawGV)
             GenericRulesDrawer.drawGv(ruleMap,

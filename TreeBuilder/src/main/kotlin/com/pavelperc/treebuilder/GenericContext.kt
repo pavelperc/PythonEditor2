@@ -1,7 +1,7 @@
 package com.pavelperc.treebuilder
 
 import com.pavelperc.treebuilder.grammar.*
-import com.pavelperc.treebuilder.RealizedRule.ElementLeaf
+import com.pavelperc.treebuilder.tree.ElementLeaf
 
 /**
  * Created by pavel on 31.03.2018.

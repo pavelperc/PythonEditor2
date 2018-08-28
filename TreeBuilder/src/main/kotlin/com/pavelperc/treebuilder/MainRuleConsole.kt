@@ -2,6 +2,7 @@ package com.pavelperc.treebuilder
 
 import com.pavelperc.treebuilder.grammar.GenericRule
 import com.pavelperc.treebuilder.graphviz.Graph
+import com.pavelperc.treebuilder.tree.ElementLeaf
 import java.util.*
 
 
@@ -85,7 +86,7 @@ class MainRuleConsole(
         
         System.err.println(chainString)
         
-        var chosen: RealizedRule.ElementLeaf? = null
+        var chosen: ElementLeaf? = null
         
         if (alternatives.size == 1) {
             System.err.println("auto choose: " + alternatives[0].gElement)

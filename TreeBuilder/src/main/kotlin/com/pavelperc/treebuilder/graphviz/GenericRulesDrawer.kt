@@ -77,7 +77,7 @@ object GenericRulesDrawer {
             node.shape = "box"
             
             // если это похоже на parserRuleId
-            if (isId && this is GenericElementLeaf && !this.looksLikeLexerRuleId) {
+            if (isId && this is GenericElementLeaf && !this.isLexerRuleId) {
                 node.color = "blue"
             } else if (isId || isString) {
                 node.fillColor = "orange"

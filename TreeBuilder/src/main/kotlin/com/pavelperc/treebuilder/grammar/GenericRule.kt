@@ -19,6 +19,11 @@ class GenericRule(
         val gAlteration: GenericAlteration
 ) {
     
+    init {
+        if (id == id.toUpperCase())
+            throw IllegalArgumentException("Grammar rule $id: id mustn't be upperCase!!!")
+    }
+    
     val leaves: Sequence<GenericElementLeaf>
         get() = gAlteration.gConcatenations.asSequence().flatMap {
             it.gRepetitions.asSequence().flatMap {
@@ -29,6 +34,7 @@ class GenericRule(
     override fun toString() = "$id:\n\t$gAlteration"
     
     
+    // TODO remove all grouping tags from GenericRule. And from this module at all.
     /** Spreads grouping tag to all leaves of this generic rule*/
     fun setGroupingTag(tag: GroupingTag) {
         leaves.forEach { it.groupingTag = tag }
@@ -182,9 +188,7 @@ abstract class GenericElement(
     /** Проверка только на [] */
     val isOption: Boolean
         get() = elementType == ElementType.OPTION
-
-//        val isGroupOrOption: Boolean
-//            get() = isGroup || isOption
+    
     
     val isId: Boolean
         get() = elementType == ElementType.ID
@@ -197,18 +201,6 @@ abstract class GenericElement(
         /** Константная строка. Например: '=' */
         STRING
     }
-    
-    
-    //        /** проверяет, что элемент может быть пропущен ([] или *)*/
-    //        boolean isOptional() {
-    //            return isOption() || repetitive == Repetitive.MULT;
-    //        }
-    
-    
-    fun isParserRuleId(ruleMap: Map<String, GenericRule>): Boolean {
-        return this is GenericElementLeaf && this.isId && ruleMap.containsKey(text)
-    }
-    
 }
 
 /** element which is GROUP or OPTION*/
@@ -238,18 +230,24 @@ class GenericElementNode(
 class GenericElementLeaf(
         /** Содержимое элемента. Только если это string или id.  */
         val text: String,
+        /** lexer rule or parser rule id, not a STRING const*/
         isId: Boolean
 ) : GenericElement(if (isId) ElementType.ID else ElementType.STRING) {
     
+    /** Is a lexeme, not grammar rule. (Like NAME, NUMBER)*/
+    val isLexerRuleId: Boolean = isId && text == text.toUpperCase()
+    
+    val isParserRuleId: Boolean = isId && !isLexerRuleId
+    
+    
+    
     init {
-        if (this.looksLikeLexerRuleId) {
+        if (this.isLexerRuleId) {
+            // TODO delete GenericContext from GenericRule and this module
             gContext = GenericContextId(this)
         }
+        
     }
-    
-    /** Похож на лексему. */
-    val looksLikeLexerRuleId: Boolean
-        get() = isId && text == text.toUpperCase()
     
     
     override fun toString() =
