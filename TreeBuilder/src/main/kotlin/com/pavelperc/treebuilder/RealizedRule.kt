@@ -1,6 +1,8 @@
 package com.pavelperc.treebuilder
 
-import com.pavelperc.treebuilder.GenericRule.*
+import com.pavelperc.treebuilder.grammar.*
+import com.pavelperc.treebuilder.graphviz.GVNode
+import com.pavelperc.treebuilder.graphviz.Graph
 
 /**
  * Реализация конкретного правила для какого-то кода на питоне.

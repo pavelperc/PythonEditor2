@@ -1,7 +1,6 @@
 package com.pavelperc.treebuilder
 
-import com.pavelperc.treebuilder.GenericRule.*
-import com.pavelperc.treebuilder.GenericRule.GenericElement.ElementType
+import com.pavelperc.treebuilder.grammar.*
 import com.pavelperc.treebuilder.RealizedRule.ElementLeaf
 
 /**

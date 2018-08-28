@@ -1,5 +1,8 @@
 package com.pavelperc.treebuilder
 
+import com.pavelperc.treebuilder.grammar.MyVisitor
+import com.pavelperc.treebuilder.grammar.RuleMap
+import com.pavelperc.treebuilder.graphviz.GenericRulesDrawer
 import java.io.FileReader
 
 /**
@@ -18,17 +21,17 @@ fun main(args: Array<String>) {
     
     
     
-//    val ruleMap = setupFullGrammar(
-//            FileReader("app/src/main/res/raw/full_grammar.txt").readText(),
-//            true,
-//            true
-//    )
-    
-    val ruleMap = setupSmallGrammar(
-            FileReader("small_grammar.txt").readText(),
+    val ruleMap = setupFullGrammar(
+            FileReader("full_grammar.txt").readText(),
             true,
             true
     )
+    
+//    val ruleMap = setupSmallGrammar(
+//            FileReader("small_grammar.txt").readText(),
+//            true,
+//            true
+//    )
     
 //    for (rule in ruleMap.values) {
 //        println(rule.toString())
@@ -108,7 +111,7 @@ enum class Palette(colorString: String) {
 // * setups grouping tags.
 // * @return ruleMap
 // */
-//fun setupSimpleGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boolean): MutableMap<String, GenericRule> {
+//fun setupSimpleGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boolean): MutableRuleMap {
 //    val ruleMap = MyVisitor.generateRuleMap(grammar)
 //    
 //    val allLeaves = ruleMap.values.flatMap { it.leaves.asIterable() }.toSet()
@@ -201,7 +204,7 @@ enum class Palette(colorString: String) {
  * setups grouping tags.
  * @return ruleMap
  */
-fun setupFullGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boolean): MutableMap<String, GenericRule> {
+fun setupFullGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boolean): RuleMap {
     val ruleMap = MyVisitor.generateRuleMap(grammar)
     
     val allLeaves = ruleMap.values.flatMap { it.leaves.asIterable() }.toSet()
@@ -352,14 +355,14 @@ fun setupFullGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boo
     
     
     if (drawGV) {
-        MyVisitor.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules: ${ruleMap.size}")
+        GenericRulesDrawer.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules: ${ruleMap.size}")
     }
     if (optimizeRules) {
         MyVisitor.optimizeRuleMap(ruleMap)
         MyVisitor.optimizeRuleMap(ruleMap)
         
         if (drawGV)
-            MyVisitor.drawGv(ruleMap,
+            GenericRulesDrawer.drawGv(ruleMap,
                     "chains/GenericRulesOptimized.gv",
                     "optimized rules: ${ruleMap.size}")
     }
@@ -372,21 +375,21 @@ fun setupFullGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boo
 /**
  * Small grammar for debug.
  */
-fun setupSmallGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boolean): MutableMap<String, GenericRule> {
+fun setupSmallGrammar(grammar: String, optimizeRules: Boolean = true, drawGV: Boolean): RuleMap {
     val ruleMap = MyVisitor.generateRuleMap(grammar)
     
 //    val allLeaves = ruleMap.values.flatMap { it.leaves.asIterable() }.toSet()
     
     
     if (drawGV) {
-        MyVisitor.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules: ${ruleMap.size}")
+        GenericRulesDrawer.drawGv(ruleMap, "chains/GenericRulesOriginal.gv", "original rules: ${ruleMap.size}")
     }
     if (optimizeRules) {
         MyVisitor.optimizeRuleMap(ruleMap)
         MyVisitor.optimizeRuleMap(ruleMap)
         
         if (drawGV)
-            MyVisitor.drawGv(ruleMap,
+            GenericRulesDrawer.drawGv(ruleMap,
                     "chains/GenericRulesOptimized.gv",
                     "optimized rules: ${ruleMap.size}")
     }

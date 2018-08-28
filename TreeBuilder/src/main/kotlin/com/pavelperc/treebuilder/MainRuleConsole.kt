@@ -1,5 +1,7 @@
 package com.pavelperc.treebuilder
 
+import com.pavelperc.treebuilder.grammar.GenericRule
+import com.pavelperc.treebuilder.graphviz.Graph
 import java.util.*
 
 

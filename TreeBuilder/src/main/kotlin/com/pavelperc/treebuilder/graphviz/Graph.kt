@@ -1,4 +1,4 @@
-package com.pavelperc.treebuilder
+package com.pavelperc.treebuilder.graphviz
 
 import java.io.File
 import java.io.FileWriter
@@ -36,9 +36,9 @@ class GVNode(
 
 /** Edge for GraphViz*/
 class GVEdge(
-    val first: GVNode,
-    val second: GVNode,
-    var style: String = "solid"
+        val first: GVNode,
+        val second: GVNode,
+        var style: String = "solid"
 ) {
     
     override fun toString(): String {

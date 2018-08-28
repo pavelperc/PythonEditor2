@@ -1,18 +1,20 @@
-package com.pavelperc.treebuilder
+package com.pavelperc.treebuilder.grammar
 
 
 // все статические вложенные классы для GenericRule
-import com.pavelperc.treebuilder.GenericRule.*
+import com.pavelperc.treebuilder.graphviz.Graph
 import com.pavelperc.treebuilder.abnf.AbnfBaseListener
 import com.pavelperc.treebuilder.abnf.AbnfBaseVisitor
 import com.pavelperc.treebuilder.abnf.AbnfLexer
 import com.pavelperc.treebuilder.abnf.AbnfParser
 import org.antlr.v4.runtime.ANTLRInputStream
-import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
-import java.io.FileInputStream
-import java.io.IOException
 import java.util.*
+import com.pavelperc.treebuilder.grammar.GrammarOptimizer.reduceGroups
+
+typealias MutableRuleMap = MutableMap<String, GenericRule>
+
+typealias RuleMap = Map<String, GenericRule>
 
 /**
  * Создаёт map со всеми правилами для грамматики
@@ -20,9 +22,7 @@ import java.util.*
  * Created by pavel on 13.11.2017.
  */
 object MyVisitor {
-    fun generateRuleMap(grammar: String): MutableMap<String, GenericRule> {
-        //        InputStream fin = new FileInputStream("grammar.txt");
-//        val fin = FileInputStream(filename)
+    fun generateRuleMap(grammar: String): MutableRuleMap {
         
         val input = ANTLRInputStream(grammar)
         // Настраиваем лексер на этот поток
@@ -35,31 +35,9 @@ object MyVisitor {
         val ruleListVisitor = RuleListVisitor()
         
         val ruleMap = ruleListVisitor.visitRulelist(parser.rulelist())
-//         закрываем файл, так как мы уже точно всё считали
-//        fin.close()
         return ruleMap
     }
     
-    fun drawGv(ruleMap: MutableMap<String, GenericRule>, fileName: String, graphLabel: String) {
-        val graph = Graph(fileName, graphLabel)
-        toGv(ruleMap, graph)
-        graph.writeToFile()
-    }
-    
-    private fun toGv(ruleMap: Map<String, GenericRule>, graph: Graph) {
-        
-        val nodes = ArrayList<String>()
-        val edges = ArrayList<String>()
-        
-        for (rule in ruleMap.values) {
-            
-            val node = graph.newNode()
-            node.label = rule.id
-            
-            rule.toGv(graph, node)
-        }
-        
-    }
     
     /**
      * Replaces all rules with groups if they occur only once.
@@ -70,7 +48,7 @@ object MyVisitor {
      *
      * (a | b) c* -> a c* | b c*
      */
-    fun optimizeRuleMap(ruleMap: MutableMap<String, GenericRule>) {
+    fun optimizeRuleMap(ruleMap: MutableRuleMap) {
         
         val usagesMap = mutableMapOf<GenericRule, Int>()
         
@@ -164,9 +142,9 @@ object MyVisitor {
      * Визитор для списка правил.
      * Когда посещаем список всех правил - возвращаем map
      */
-    class RuleListVisitor : AbnfBaseVisitor<Map<String, GenericRule>>() {
+    class RuleListVisitor : AbnfBaseVisitor<RuleMap>() {
         
-        override fun visitRulelist(ctx: AbnfParser.RulelistContext): MutableMap<String, GenericRule> {
+        override fun visitRulelist(ctx: AbnfParser.RulelistContext): MutableRuleMap {
             val ruleMap = mutableMapOf<String, GenericRule>()
             
             // По всем детям списка правил. (то есть по всем описаниям правил.)

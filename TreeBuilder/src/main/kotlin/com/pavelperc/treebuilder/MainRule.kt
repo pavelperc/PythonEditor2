@@ -1,5 +1,7 @@
 package com.pavelperc.treebuilder
 
+import com.pavelperc.treebuilder.grammar.GenericRule
+
 /**
  * Расширение для RealizedRule.
  * Это класс, в котором будет храниться реализация основного (стартового) правила всей грамматики.
