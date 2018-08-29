@@ -2,6 +2,7 @@ package com.pavelperc.treebuilder
 
 import com.pavelperc.treebuilder.grammar.GenericRule
 import com.pavelperc.treebuilder.graphviz.Graph
+import com.pavelperc.treebuilder.graphviz.RuleTreeDrawer
 import com.pavelperc.treebuilder.tree.ElementLeaf
 import java.util.*
 
@@ -56,14 +57,12 @@ class MainRuleConsole(
     
     private fun drawGvFull() {
         val graph = Graph("chains/${this.gRule.id}${gvFileCounter}.gv", chainString)
-        toGv(graph, false)
-        graph.writeToFile()
+        RuleTreeDrawer(this, graph, false).draw()
     }
     
     private fun drawGvChosen() {
         val graph = Graph("chains/chosen_${this.gRule.id}${gvFileCounter}.gv", chainString)
-        toGv(graph, true)
-        graph.writeToFile()
+        RuleTreeDrawer(this, graph, true).draw()
     }
     
     private fun drawGv() {
