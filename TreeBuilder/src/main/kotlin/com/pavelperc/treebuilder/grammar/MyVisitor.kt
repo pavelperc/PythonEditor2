@@ -42,7 +42,7 @@ object MyVisitor {
     private fun checkParserRuleNames(ruleMap: MutableRuleMap) {
         ruleMap.values
                 .forEach { rule ->
-                    rule.leaves
+                    rule.allLeaves
                             .filter { it.isParserRuleId }
                             .forEach {
                                 if (!ruleMap.containsKey(it.text))

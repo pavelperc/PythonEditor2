@@ -22,40 +22,48 @@ class GenericRule(
     init {
         if (id == id.toUpperCase())
             throw IllegalArgumentException("Grammar rule $id: id mustn't be upperCase!!!")
+        
+        gAlteration.gRule = this
     }
     
-    val leaves: Sequence<GenericElementLeaf>
-        get() = gAlteration.gConcatenations.asSequence().flatMap {
-            it.gRepetitions.asSequence().flatMap {
-                it.gElement.leaves
-            }
-        }
+    /** all leaf elements under this rule*/
+    val allLeaves: Sequence<GenericElementLeaf>
+        get() = gAlteration.allLeaves
+    
+    /** All child elements, on this level, including groups and options*/
+    val allElements: List<GenericElement>
+        get() = gAlteration.allElements
     
     override fun toString() = "$id:\n\t$gAlteration"
     
     
     // TODO remove all grouping tags from GenericRule. And from this module at all.
-    /** Spreads grouping tag to all leaves of this generic rule*/
+    /** Spreads grouping tag to all allLeaves of this generic rule*/
     fun setGroupingTag(tag: GroupingTag) {
-        leaves.forEach { it.groupingTag = tag }
+        allLeaves.forEach { it.groupingTag = tag }
     }
-
-//------------ nested Classes:
-    
 }
 
 
 class GenericAlteration(
-        val gConcatenations: MutableList<GenericConcatenation>
+        val gConcatenations: MutableList<GenericConcatenation>,
+        var gRule: GenericRule? = null
 ) {
-    /** Отец заполняется в конструкторе gElementNode если мы к нему подключимся*/
-    var father: GenericElementNode? = null
-    
-    
     init {
         gConcatenations.forEach { it.father = this }
     }
     
+    /** The father is initialized in the constructor of gElementNode if we have bound to it*/
+    var father: GenericElementNode? = null
+    
+    
+    /** All child elements, on this level, including groups and options*/
+    val allElements: List<GenericElement>
+        get() = gConcatenations.flatMap { it.gRepetitions.map { it.gElement } }
+    
+    /** all leaf elements under this alteration*/
+    val allLeaves:Sequence<GenericElementLeaf>
+        get() = gConcatenations.asSequence().flatMap { it.gRepetitions.asSequence().flatMap { it.gElement.allLeaves } }
     
     override fun toString() = gConcatenations.joinToString(" | ")
     
@@ -66,12 +74,15 @@ class GenericConcatenation(
         val gRepetitions: MutableList<GenericRepetition>
 ) {
     
-    /** Отец заполняется в конструкторе gAlt*/
-    var father: GenericAlteration? = null
-    
     init {
         gRepetitions.forEach { it.father = this }
     }
+    
+    val gRule: GenericRule?
+        get() = father.gRule
+    
+    /** Отец заполняется в конструкторе gAlt*/
+    lateinit var father: GenericAlteration
     
     override fun toString() = gRepetitions.joinToString(" ")
     
@@ -79,14 +90,17 @@ class GenericConcatenation(
 
 class GenericRepetition(
         val repetitive: Repetitive = Repetitive.NONE,
-        var gElement: GenericElement,
-        /** Отец заполняется в конструкторе gConc*/
-        var father: GenericConcatenation? = null
+        var gElement: GenericElement
 ) {
+    /** The father is initialized in the constructor of gConc*/
+    lateinit var father: GenericConcatenation
     
     init {
         gElement.father = this
     }
+    
+    val gRule: GenericRule?
+        get() = father.gRule
     
     val isNone: Boolean
         get() = repetitive == Repetitive.NONE
@@ -119,6 +133,10 @@ class GenericRepetition(
             else
                 throw Exception("Can not get gElement with text.")
     
+    val positionInFather: Int by lazy {
+        father.gRepetitions.indexOf(this)
+    }
+    
     
     override fun toString() = gElement.toString() + repetitive.toString()
     
@@ -132,29 +150,22 @@ abstract class GenericElement(
         private var lastId = 0
     }
     
+    val gRule: GenericRule?
+        get() = father.gRule
+    
     /** Identical number of Generic element among all*/
     val id = lastId++
     
     
-    /** Означает, что соответствующий реализованный элемент
-     * точно не может быть optional, даже если он полностью пустой.
-     * Пометка true может установиться только внутри [RealizedRule.Element.isOptional]*/
-    var checkedNonOptional: Boolean = false
+    /** The father is initialized in the constructor of gRep*/
+    lateinit var father: GenericRepetition
     
-    
-    /** Отец заполняется в конструкторе gRep*/
-    var father: GenericRepetition? = null
-    
-    /** все листья этой подветви, включая себя*/
-    val leaves: Sequence<GenericElementLeaf>
+    /** all leaf elements from this branch, including itself*/
+    val allLeaves: Sequence<GenericElementLeaf>
         get() = when {
             this is GenericElementLeaf -> listOf(this).asSequence()
             this is GenericElementNode ->
-                gAlteration.gConcatenations.asSequence().flatMap {
-                    it.gRepetitions.asSequence().flatMap {
-                        it.gElement.leaves
-                    }
-                }
+                gAlteration.allLeaves
             else -> throw Exception("Unreachable")
         }
     
@@ -175,10 +186,6 @@ abstract class GenericElement(
             }
         }
     
-    
-    var gContext: GenericContext? = null
-    
-    
     val isString: Boolean
         get() = elementType == ElementType.STRING
     
@@ -192,6 +199,12 @@ abstract class GenericElement(
     
     val isId: Boolean
         get() = elementType == ElementType.ID
+    
+    /** Is a grammar rule. (Like stmt, assign)*/
+    open val isParserRuleId: Boolean = false
+    
+    /** Is a lexeme, not grammar rule. (Like NAME, NUMBER)*/
+    open val isLexerRuleId: Boolean = false
     
     enum class ElementType {
         /** либо lexer rule либо parser rule  */
@@ -235,19 +248,10 @@ class GenericElementLeaf(
 ) : GenericElement(if (isId) ElementType.ID else ElementType.STRING) {
     
     /** Is a lexeme, not grammar rule. (Like NAME, NUMBER)*/
-    val isLexerRuleId: Boolean = isId && text == text.toUpperCase()
+    override val isLexerRuleId: Boolean = isId && text == text.toUpperCase()
     
-    val isParserRuleId: Boolean = isId && !isLexerRuleId
-    
-    
-    
-    init {
-        if (this.isLexerRuleId) {
-            // TODO delete GenericContext from GenericRule and this module
-            gContext = GenericContextId(this)
-        }
-        
-    }
+    /** Is a grammar rule. (Like stmt, assign)*/
+    override val isParserRuleId: Boolean = isId && !isLexerRuleId
     
     
     override fun toString() =
@@ -258,7 +262,7 @@ class GenericElementLeaf(
             }
     
     
-    /** Checks if current elementLeaf matches [id].
+    /** Checks if the current elementLeaf matches [id].
      * @throws Exception If it matches and [GenericElementLeaf.text] != [checkText]*/
     fun checkById(id: Int, checkText: String): Boolean =
             if (id == this.id && checkText != text)

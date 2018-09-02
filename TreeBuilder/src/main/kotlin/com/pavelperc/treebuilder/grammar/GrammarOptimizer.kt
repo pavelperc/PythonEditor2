@@ -112,7 +112,7 @@ object GrammarOptimizer {
         
         // заполняем количество использований правил
         for (rule in ruleMap.values) {
-            val leaves = rule.leaves
+            val leaves = rule.allLeaves
             for (leaf in leaves) {
                 
                 // листы, имена которых есть в списке правил
@@ -133,7 +133,7 @@ object GrammarOptimizer {
         
         // заменяем все правила на группы, если они встречаются не более 1 раза
         for (rule in ruleMap.values) {
-            val leaves = rule.leaves
+            val leaves = rule.allLeaves
             for (leaf in leaves) {
                 // листы, имена которых есть в списке правил (то есть правила)
                 if (ruleMap.containsKey(leaf.text)) {
