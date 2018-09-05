@@ -5,15 +5,12 @@ import org.junit.Test
 
 class AlternativesSearcherTest {
     
-    fun loadRuleMap() = MyVisitor.generateRuleMap("""
+    @Test
+    fun findAlternativesTest() {
+        val ruleMap = MyVisitor.generateRuleMap("""
             stmt: NAME '=' NUM (sign NUM)* END
             sign: '+' | '-'
         """.trimIndent())
-    
-    
-    @Test
-    fun findAlternativesTest() {
-        val ruleMap = loadRuleMap()
         
         val cursor: ElementLeaf? = null
         
@@ -25,16 +22,19 @@ class AlternativesSearcherTest {
     
     @Test
     fun findFirstInsertionPointTest() {
-        val ruleMap = loadRuleMap()
+        val ruleMap = MyVisitor.generateRuleMap("""
+            stmt: NAME '=' NUM (sign NUM)* END
+            sign: '+' | '-'
+        """.trimIndent())
+        
         val rootGRule = ruleMap["stmt"]!!
         val alternativesSearcher = AlternativesSearcher(rootGRule)
         
         val root = RuleNode(rootGRule, ruleMap, null)
-        
-        val name = ElementLeaf(rootGRule.allElements[0], null, ruleMap, "hello")
-        
-        root.addElementLeaf(name, 0)
-        
+
+//        val name = ElementLeaf(rootGRule.allElements[0], null, ruleMap, "hello")
+//        root.addElementLeaf(name, 0)
+
 //        alternativesSearcher.findFirstInsertionPoint()
         
     }
