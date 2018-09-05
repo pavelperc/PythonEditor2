@@ -17,7 +17,7 @@ class ElementLeaf(
         var text: String? = null
 ) : Element(father, ruleMap) {
     init {
-        if (!gElement.isString || !gElement.isLexerRuleId)
+        if (!gElement.isString && !gElement.isLexerRuleId)
             throw IllegalArgumentException("Can not create ElementLeaf from $gElement, " +
                     "it should be string const (like '=') or lexer rule (like NUMBER)")
         
@@ -60,6 +60,85 @@ abstract class ElementNode(
             }
         }
     
+    data class PathSegment(
+        val gAlt: GenericAlteration,
+        val gConc: GenericConcatenation,
+        val gRep: GenericRepetition,
+        val gElement: GenericElement
+    )
+    
+    /** Generates a path from the root gAlteration to this [gElement]*/
+    fun generatePathToRule(gElement: GenericElement): List<PathSegment> {
+        // TODO generatePathToRule: move out of RuleNode
+        val segment = PathSegment(
+            gElement.father.father.father,
+            gElement.father.father,
+            gElement.father,
+            gElement
+        )
+        
+        val fatherElement = gElement.father.father.father.father
+        if (fatherElement == null) {
+            return listOf(segment)
+        } else {
+            return generatePathToRule(fatherElement).plus(segment)
+        }
+    }
+    
+    /**
+     * Adds [leaf] to the rule, knowing only [positionInRep] to insert in the last (the lowest) rep.
+     * It builds all the tree above, if there are no any problems.
+     * If the rule not matches - throws an exception.
+     * If the path from the element contains upper groups and some group can be inserted ambiguously into its repetition,
+     * throws an exception. 
+     * */
+    fun addElementLeaf(leaf: ElementLeaf, positionInRep: Int = 0) {
+        // TODO addElementLeaf: generalize for Node and Leaf
+        if (leaf.gElement.gRule != gAlteration.gRule) {
+            throw IllegalArgumentException("gRule mismatch! Tried to add the leaf $leaf with gRule " +
+                    "${leaf.gElement.gRule} to ElementNode with gRule ${gAlteration.gRule}")
+        }
+        
+        val path = generatePathToRule(leaf.gElement)
+        
+        val startSegment = path[0]
+        
+        // TODO addElementLeaf: handle multichoice
+        if (conc == null) {
+            // just selecting one alternative
+            conc = Concatenation(startSegment.gConc, this)
+        }
+        
+        val positionInConc = startSegment.gRep.positionInFather
+        val rep = conc!!.repetitions[positionInConc]
+        
+        
+        if (path.size > 1) {
+            // adding to upper segment, so we don't take positionInRep into account
+            
+            if (rep.elements.isNotEmpty()) {
+                throw Exception("Ambiguous insertion: element $leaf path to its gRule contains rep, that is partially filled")
+            } else {
+                // elements is empty
+                val groupNode = GroupNode(startSegment.gElement as GenericElementNode, ruleMap, rep)
+                rep.elements.add(groupNode)
+                // go in recursion
+                groupNode.addElementLeaf(leaf, positionInRep)
+            }
+        } else {
+            // check positionInRep
+            
+            if (positionInRep > rep.elements.size || positionInRep < 0)
+                throw IllegalArgumentException("Illegal positionInRep=$positionInConc " +
+                        "is out of elements's size=${rep.elements.size}")
+            
+            if (rep.isFilled)
+                throw IllegalArgumentException("Tried to add element in filled rep $rep")
+            
+            // add existing element to rep
+            rep.elements.add(positionInRep, leaf)
+        }
+    }
 }
 
 open class GroupNode(
@@ -77,73 +156,6 @@ class RuleNode(
 ) : ElementNode(gRule.gAlteration, ruleMap, father) {
     
     
-    private data class PathSegment(
-            val gAlt: GenericAlteration,
-            val gConc: GenericConcatenation,
-            val gRep: GenericRepetition,
-            val gElement: GenericElement
-    )
-    
-    private fun generatePathToRule(gElement: GenericElement): List<PathSegment> {
-        val segment = PathSegment(
-                gElement.father.father.father,
-                gElement.father.father,
-                gElement.father,
-                gElement
-        )
-        
-        val fatherElement = gElement.father.father.father.father
-        
-        if (fatherElement == null) {
-            return listOf(segment)
-        } else {
-            return generatePathToRule(fatherElement).plus(segment)
-        }
-    }
-    
-    /**
-     * Adds [leaf] to the rule, knowing only [positionInRep] to insert in the last (the lowest) rep.
-     * It builds all the tree above, if there are no any problems.
-     * If the rule not matches - throws an exception.
-     * If the path from the element contains upper groups and some group can be inserted ambiguously into its repetition,
-     * throws an exception.
-     * */
-    fun addElementLeaf(leaf: ElementLeaf, positionInRep: Int = 0) {
-        if (leaf.gElement.gRule != gRule) {
-            throw IllegalArgumentException("gRule mismatch! Tried to add the leaf $leaf with gRule " +
-                    "${leaf.gElement.gRule} to RuleNode with gRule $gRule")
-        }
-        
-        val path = generatePathToRule(leaf.gElement)
-        
-        val startSegment = path[0]
-        
-        // TODO addElementLeaf: handle multichoice
-        if (conc == null) {
-            // just selecting one alternative
-            conc = Concatenation(startSegment.gConc, this)
-        }
-        
-        val position = startSegment.gRep.positionInFather
-        val rep = conc!!.repetitions[position]
-        
-        
-        if (path.size > 1) {
-            // adding to upper segment, so we don't take positionInRep into account
-            
-            if (rep.elements.isNotEmpty()) {
-                throw Exception("Ambiguous insertion: element $leaf path to its gRule contains rep, that is partially filled")
-            } else {
-                rep.elements.add(GroupNode(startSegment.gElement as GenericElementNode, ruleMap, rep))
-                // go in recursion
-                todo
-            }
-        } else {
-            // check positionInRep
-            todo
-        }
-    }
-    
 }
 
 class Concatenation(
@@ -158,6 +170,22 @@ class Repetition(
         val father: Concatenation
 ) {
     val elements = mutableListOf<Element>()
+    val isFilled: Boolean
+        get() = gRep.isNone && elements.size > 0
+    
+//    var firstElement: Element?
+//        get() = elements[0]
+//        set(value) {
+//            if (value == null) {
+//                if (elements.size == 1) {
+//                    elements.clear()
+//                } else if (elements.size > 1)
+//            }
+//            
+//            if (elements.isEmpty()) {
+//                elements.add(value)
+//            }
+//        }
 }
 
 

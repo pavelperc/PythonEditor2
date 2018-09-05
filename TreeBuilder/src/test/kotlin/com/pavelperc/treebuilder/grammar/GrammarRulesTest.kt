@@ -1,12 +1,16 @@
-package com.pavelperc.treebuilder
+package com.pavelperc.treebuilder.grammar
 
-import com.pavelperc.treebuilder.grammar.*
+import com.pavelperc.treebuilder.Grammars
+import org.amshove.kluent.shouldBeInstanceOf
+import org.amshove.kluent.shouldBeTrue
+import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldEqualTo
 import org.junit.Test
 
 import org.junit.Assert.*
 import java.lang.IllegalArgumentException
 
-class MyVisitorTest {
+class GrammarRulesTest {
     
     
     @Test
@@ -94,6 +98,53 @@ class MyVisitorTest {
         
         MyVisitor.generateRuleMap(badGrammar)
     }
+    
+    @Test
+    fun testGenericRuleAllElements() {
+        val ruleMap = MyVisitor.generateRuleMap(
+                """
+            stmt: NAME '=' NUM (sign NUM)* END
+            sign: '+' | '-'
+        """.trimIndent()
+        )
+        val stmt = ruleMap["stmt"]!!
+        val allElements = stmt.allElements
+        allElements.size shouldEqualTo 5
+        
+        allElements[0] shouldBeInstanceOf GenericElementLeaf::class
+        allElements[1] shouldBeInstanceOf GenericElementLeaf::class
+        allElements[2] shouldBeInstanceOf GenericElementLeaf::class
+        allElements[3] shouldBeInstanceOf GenericElementNode::class
+        allElements[4] shouldBeInstanceOf GenericElementLeaf::class
+        
+        (allElements[0] as GenericElementLeaf).text shouldEqual "NAME"
+        (allElements[1] as GenericElementLeaf).text shouldEqual "="
+        (allElements[2] as GenericElementLeaf).text shouldEqual "NUM"
+        allElements[3].isGroup.shouldBeTrue()
+        (allElements[4] as GenericElementLeaf).text shouldEqual "END"
+    }
+    
+    @Test
+    fun testGenericRuleAllLeaves() {
+        val ruleMap = MyVisitor.generateRuleMap(
+                """
+            stmt: NAME '=' NUM (sign NUM)* END
+            sign: '+' | '-'
+        """.trimIndent()
+        )
+        val stmt = ruleMap["stmt"]!!
+        val allLeaves = stmt.allLeaves.toList()
+        allLeaves.size shouldEqualTo 6
+        
+        allLeaves[0].text shouldEqual "NAME"
+        allLeaves[1].text shouldEqual "="
+        allLeaves[2].text shouldEqual "NUM"
+        allLeaves[3].text shouldEqual "sign"
+        allLeaves[4].text shouldEqual "NUM"
+        allLeaves[5].text shouldEqual "END"
+    }
+    
+    
     
     
 }
