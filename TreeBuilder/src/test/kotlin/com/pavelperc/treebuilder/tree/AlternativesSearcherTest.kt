@@ -30,7 +30,7 @@ class AlternativesSearcherTest {
         val rootGRule = ruleMap["stmt"]!!
         val alternativesSearcher = AlternativesSearcher(rootGRule)
         
-        val root = RuleNode(rootGRule, ruleMap, null)
+        val root = RuleNode(rootGRule, null)
 
 //        val name = ElementLeaf(rootGRule.allElements[0], null, ruleMap, "hello")
 //        root.addElementLeaf(name, 0)

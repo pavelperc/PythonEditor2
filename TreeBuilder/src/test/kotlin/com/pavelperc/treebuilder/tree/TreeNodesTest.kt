@@ -2,6 +2,8 @@ package com.pavelperc.treebuilder.tree
 
 import com.pavelperc.treebuilder.exception.MultichoiceNotHandledException
 import com.pavelperc.treebuilder.grammar.MyVisitor
+import com.pavelperc.treebuilder.graphviz.Graph
+import com.pavelperc.treebuilder.graphviz.RuleTreeDrawer
 import org.amshove.kluent.*
 import org.junit.Test
 
@@ -61,7 +63,7 @@ class TreeNodesTest {
             rule: A | B C*
         """.trimIndent())
         val gRule = ruleMap["rule"]!!
-        val rule = RuleNode(gRule, ruleMap)
+        val rule = RuleNode(gRule)
         
         // empty conc
         rule.conc.shouldBeNull()
@@ -93,7 +95,7 @@ class TreeNodesTest {
         val gRule1 = ruleMap["rule1"]!!
         val gRule2 = ruleMap["rule2"]!!
         
-        val rule1 = RuleNode(gRule1, ruleMap)
+        val rule1 = RuleNode(gRule1)
         
         rule1.conc.shouldBeNull()
         
@@ -107,7 +109,7 @@ class TreeNodesTest {
         rule1.conc.shouldNotBeNull()
         rule1.conc!!.repetitions.size shouldEqualTo 2
         
-        val rule2 = RuleNode(gRule2, ruleMap)
+        val rule2 = RuleNode(gRule2)
         
         // initial conc is null even if there are no alternatives
         rule2.conc.shouldBeNull()
@@ -126,17 +128,19 @@ class TreeNodesTest {
         """.trimIndent())
     
         val rootGRule = ruleMap["stmt"]!!
-        val root = RuleNode(rootGRule, ruleMap, null)
+        val root = RuleNode(rootGRule)
         
         val conc = root.chooseConc(0)
         
-        val name = Element.fromRepetition(conc.repetitions[0]) as ElementLeaf
-        val eq = Element.fromRepetition(conc.repetitions[1]) as ElementLeaf
+        val elemCreator = ElementCreator(ruleMap)
+        
+        val name = elemCreator.fromRepetition(conc.repetitions[0]) as ElementLeaf
+        val eq = elemCreator.fromRepetition(conc.repetitions[1]) as ElementLeaf
         name.gElement.isLexerRuleId.shouldBeTrue()
         eq.gElement.isString.shouldBeTrue()
         
-        val group1 = Element.fromRepetition(conc.repetitions[3]) as GroupNode
-        val group2 = Element.fromRepetition(conc.repetitions[3], 0) as GroupNode
+        val group1 = elemCreator.fromRepetition(conc.repetitions[3]) as GroupNode
+        val group2 = elemCreator.fromRepetition(conc.repetitions[3], 0) as GroupNode
         
         conc.repetitions[3].elements.size shouldEqualTo 2
         // group2 should be inserted to the beginning!!
@@ -145,10 +149,10 @@ class TreeNodesTest {
         
         val group1Conc = group1.chooseConc()
         
-        val sign = Element.fromRepetition(group1Conc.repetitions[0]) as RuleNode
+        val sign = elemCreator.fromRepetition(group1Conc.repetitions[0]) as RuleNode
         
         val signConc = sign.chooseConc(1)
-        val minus = Element.fromRepetition(signConc.repetitions[0]) as ElementLeaf
+        val minus = elemCreator.fromRepetition(signConc.repetitions[0]) as ElementLeaf
         
         minus.gElement.text shouldEqual "-"
         
@@ -156,6 +160,7 @@ class TreeNodesTest {
         sign.father shouldBe group1Conc.repetitions[0]
         group1.father shouldBe conc.repetitions[3]
         
-        // TODO add graphviz
+        // draw graphviz
+        RuleTreeDrawer(root, Graph("chains/createElementFromRepTest.gv")).draw()
     }
 }

@@ -52,7 +52,8 @@ class GVEdge(
 }
 
 /** Used for creating visualized graph for GraphViz.
- * Created graph is saved to [fileName] after calling method [writeToFile]*/
+ * Created graph is saved to [fileName] after calling method [writeToFile].
+ * [fileName] should have .gv extension*/
 class Graph(val fileName:String, val graphLabel: String = fileName, val fontsize: Int = 80) {
     
     private val nodes = mutableListOf<GVNode>()
