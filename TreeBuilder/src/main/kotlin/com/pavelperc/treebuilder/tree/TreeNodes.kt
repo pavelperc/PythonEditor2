@@ -32,6 +32,12 @@ class ElementLeaf(
             text = gElement.text
         }
     }
+    
+    override fun toString() =
+            if (gElement.isString)
+                "'${gElement.text}'"
+            else
+                "${gElement.text}($text)"
 }
 
 abstract class ElementNode(
@@ -97,13 +103,18 @@ open class GroupNode(
         val gElementNode: GenericElementNode,
         var fatherRep: Repetition
 ) : ElementNode(gElementNode.gAlteration, fatherRep) {
-    
+    override fun toString() =
+            if (gElementNode.isGroup)
+                "group${gElementNode.id}"
+            else
+                "option${gElementNode.id}"
 }
 
 open class RuleNode(
         val gRule: GenericRule,
         father: Repetition? = null
 ) : ElementNode(gRule.gAlteration, father) {
+    override fun toString(): String = gRule.id
 }
 
 
@@ -124,6 +135,9 @@ class Repetition(
     
     val isFilled: Boolean
         get() = gRep.isNone && elements.size > 0
+    
+    val rightRep: Repetition?
+        get() = father.repetitions.getOrNull(positionInFather + 1)
 }
 
 

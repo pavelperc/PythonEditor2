@@ -151,7 +151,7 @@ class TreeNodesTest {
         
         val sign = elemCreator.fromRepetition(group1Conc.repetitions[0]) as RuleNode
         
-        val signConc = sign.chooseConc(1)
+        val signConc = sign.chooseConc(1)// chose minus
         val minus = elemCreator.fromRepetition(signConc.repetitions[0]) as ElementLeaf
         
         minus.gElement.text shouldEqual "-"
