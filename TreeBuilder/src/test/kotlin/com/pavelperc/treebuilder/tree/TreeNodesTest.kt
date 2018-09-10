@@ -6,6 +6,7 @@ import com.pavelperc.treebuilder.graphviz.Graph
 import com.pavelperc.treebuilder.graphviz.RuleTreeDrawer
 import org.amshove.kluent.*
 import org.junit.Test
+import kotlin.test.assertFailsWith
 
 
 class TreeNodesTest {
@@ -81,7 +82,10 @@ class TreeNodesTest {
         
         // multiconc
         rule.concs.add(Concatenation(gRule.gAlteration.gConcatenations[0], rule))
-        val f = {rule.conc} shouldThrow MultichoiceNotHandledException::class
+        
+        assertFailsWith<MultichoiceNotHandledException> {
+            rule.conc
+        }
         
     }
     
@@ -115,9 +119,10 @@ class TreeNodesTest {
         rule2.conc.shouldBeNull()
         rule2.chooseConc(0)
         
-        val f = {
+        
+        assertFailsWith<IllegalArgumentException> {
             rule2.chooseConc(1)
-        } shouldThrow IllegalArgumentException::class
+        }
     }
     
     @Test

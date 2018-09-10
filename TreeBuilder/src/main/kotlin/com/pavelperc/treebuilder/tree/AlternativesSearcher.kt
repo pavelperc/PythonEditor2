@@ -40,6 +40,9 @@ class AlternativesSearcher() {
     }
     
     
+    
+    
+    
 //    fun searchRuleStacks(gElement: GenericElement):List<RuleStack> {
 //        if (gElement is GenericElementLeaf && !gElement.isParserRuleId) {
 //            return listOf(RuleStack(gElement, gElement))

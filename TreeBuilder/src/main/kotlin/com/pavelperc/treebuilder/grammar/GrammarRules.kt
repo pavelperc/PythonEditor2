@@ -23,8 +23,18 @@ class GenericRule(
         if (id == id.toUpperCase())
             throw IllegalArgumentException("Grammar rule $id: id mustn't be upperCase!!!")
         
-        gAlteration.gRule = this
+        gAlteration.fillGRuleRec(this)
     }
+    
+    private fun GenericAlteration.fillGRuleRec(newRule: GenericRule) {
+        gRule = newRule
+        allElements
+                .filter { it is GenericElementNode }
+                .map { it as GenericElementNode }
+                .forEach { it.gAlteration.fillGRuleRec(newRule) }
+    }
+    
+    
     
     /** all leaf elements under this rule*/
     val allLeaves: Sequence<GenericElementLeaf>
@@ -46,9 +56,11 @@ class GenericRule(
 
 
 class GenericAlteration(
-        val gConcatenations: MutableList<GenericConcatenation>,
-        var gRule: GenericRule? = null
+        val gConcatenations: MutableList<GenericConcatenation>
 ) {
+    /**Father rule. Filled in GenericRule constructor*/
+    lateinit var gRule: GenericRule
+    
     init {
         gConcatenations.forEach { it.father = this }
     }
@@ -78,7 +90,7 @@ class GenericConcatenation(
         gRepetitions.forEach { it.father = this }
     }
     
-    val gRule: GenericRule?
+    val gRule: GenericRule
         get() = father.gRule
     
     /** Отец заполняется в конструкторе gAlt*/
@@ -99,7 +111,7 @@ class GenericRepetition(
         gElement.father = this
     }
     
-    val gRule: GenericRule?
+    val gRule: GenericRule
         get() = father.gRule
     
     val isNone: Boolean
@@ -150,7 +162,7 @@ abstract class GenericElement(
         private var lastId = 0
     }
     
-    val gRule: GenericRule?
+    val gRule: GenericRule
         get() = father.gRule
     
     /** Identical number of Generic element among all*/
@@ -226,6 +238,8 @@ class GenericElementNode(
 ) {
     init {
         gAlteration.father = this
+        // can't init, because we haven't inited our gRule
+//        gAlteration.gRule = gRule
     }
     
     override fun toString(): String {

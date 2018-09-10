@@ -1,10 +1,7 @@
 package com.pavelperc.treebuilder.grammar
 
 import com.pavelperc.treebuilder.Grammars
-import org.amshove.kluent.shouldBeInstanceOf
-import org.amshove.kluent.shouldBeTrue
-import org.amshove.kluent.shouldEqual
-import org.amshove.kluent.shouldEqualTo
+import org.amshove.kluent.*
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -64,7 +61,7 @@ class GrammarRulesTest {
                 assertTrue(group is GenericElementNode && group.isGroup)
                 
                 
-                (group as GenericElementNode).gAlteration.also {alt ->
+                (group as GenericElementNode).gAlteration.also { alt ->
                     assertTrue(alt.father == group)
                 }
                 
@@ -74,7 +71,7 @@ class GrammarRulesTest {
             }
         }
         
-        sign.gAlteration.apply { 
+        sign.gAlteration.apply {
             assertEquals(2, gConcatenations.size)
         }
     }
@@ -126,12 +123,11 @@ class GrammarRulesTest {
     
     @Test
     fun testGenericRuleAllLeaves() {
-        val ruleMap = MyVisitor.generateRuleMap(
-                """
+        val ruleMap = MyVisitor.generateRuleMap("""
             stmt: NAME '=' NUM (sign NUM)* END
             sign: '+' | '-'
-        """.trimIndent()
-        )
+        """.trimIndent())
+        
         val stmt = ruleMap["stmt"]!!
         val allLeaves = stmt.allLeaves.toList()
         allLeaves.size shouldEqualTo 6
@@ -145,6 +141,36 @@ class GrammarRulesTest {
     }
     
     
-    
-    
+    @Test
+    fun testLateInitProps() {
+        val ruleMap = MyVisitor.generateRuleMap("""
+            stmt: NAME '=' NUM (sign NUM)* END
+            sign: '+' | '-'
+        """.trimIndent())
+        
+        val stmt = ruleMap["stmt"]!!
+        val num = stmt.allElements[2]
+        val group = stmt.allElements[3] as GenericElementNode
+        val sign = group.gAlteration.allElements[0]
+        
+        stmt.gAlteration.apply { 
+            gRule shouldNotBe null
+            father shouldBe null
+        }
+        
+        num.apply {
+            gRule shouldNotBe null
+            father shouldNotBe null
+        }
+        
+        group.apply {
+            gRule shouldNotBe null
+            father shouldNotBe null
+        }
+        
+        sign.apply {
+            gRule shouldNotBe null
+            father shouldNotBe null
+        }
+    }
 }
