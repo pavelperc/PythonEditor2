@@ -23,7 +23,7 @@ class AlternativesSearcher {// TODO: AlternativesSearcher convert to object
         fun gAltIsOptional(gAlt: GenericAlteration, ruleMap: RuleMap) =
                 gAlt.isOptional(ruleMap, mutableSetOf(gAlt.gRule))
         
-        public fun GenericRepetition.isOptional(ruleMap: RuleMap, recursiveRules: MutableSet<GenericRule>): Boolean {
+        private fun GenericRepetition.isOptional(ruleMap: RuleMap, recursiveRules: MutableSet<GenericRule>): Boolean {
             if (cachedIsOptional != null)
                 return cachedIsOptional!!
             

@@ -1,33 +1,38 @@
 package com.pavelperc.treebuilder.tree
 
 import com.pavelperc.takeWhileIncl
-import com.pavelperc.treebuilder.grammar.GenericAlteration
-import com.pavelperc.treebuilder.grammar.GenericElementLeaf
-import com.pavelperc.treebuilder.grammar.GenericRule
-import com.pavelperc.treebuilder.grammar.RuleMap
+import com.pavelperc.treebuilder.grammar.*
 
 
-/** Represents all available alternatives, coming from one empty genericElement*/
+/** Represents all available alternatives, coming from one genericElement*/
 class AlternativesSubtree private constructor(
         val rootRule: GenericRule,
         val leaves: List<Node>
 ) {
     companion object {
-        fun generateTree(rootRule: GenericRule) {
+        fun generateTree(rootRule: GenericRule, ruleMap: RuleMap) {
             
             
         }
         
-        fun getAvailableLeaves(gRule: GenericRule) {
-//            gRule.gAlteration.gConcatenations.
-        }
+        fun getAvailableLeaves(gRule: GenericRule, ruleMap: RuleMap) =
+                gRule.gAlteration.getAvailableLeaves(ruleMap)
         
-        private fun GenericAlteration.getAvailableLeaves(ruleMap: RuleMap) {
-            
-            gConcatenations
-                    .flatMap { it.gRepetitions }
-                    .takeWhileIncl { AlternativesSearcher.gRepIsOptional(it, ruleMap) }
-        }
+        /** Returns all optional leaves of this gAlt and first non-optional in each alt branch*/
+        private fun GenericAlteration.getAvailableLeaves(ruleMap: RuleMap): List<GenericElementLeaf> =
+                gConcatenations
+                        .flatMap {
+                            it.gRepetitions
+                                    // take all optional and one not optional (if it exists)
+                                    .takeWhileIncl { AlternativesSearcher.gRepIsOptional(it, ruleMap) }
+                        }
+                        .map { it.gElement }
+                        .map { optEl ->
+                            when (optEl) {
+                                is GenericElementLeaf -> listOf(optEl)
+                                is GenericElementNode -> optEl.gAlteration.getAvailableLeaves(ruleMap)
+                            }
+                        }.flatMap { it }
         
         
     }
@@ -35,7 +40,7 @@ class AlternativesSubtree private constructor(
     
     /** checks if all leaves converge to rootRule*/
     private fun validateLeaves() {
-    
+        
         for (leaf in leaves) {
             if (leaf.gLeaf.isParserRuleId)
                 throw IllegalArgumentException("leaf $leaf is parserRuleId")
@@ -68,6 +73,6 @@ class AlternativesSubtree private constructor(
         
         /** Returns a sequence from the current Node to the rootRule*/
         val revSequence: Sequence<Node>
-                get() = generateSequence(this) { it.father }
+            get() = generateSequence(this) { it.father }
     }
 }

@@ -20,7 +20,7 @@ class RuleTreeDrawer(
         me.shape = "box"
         
         if (father != null) {
-            val edge = graph.newEdge(father, me)
+            graph.newEdge(father, me)
         }
         
         concs.forEach { it.toGv(me) }
@@ -31,7 +31,7 @@ class RuleTreeDrawer(
         val me = graph.newNode()
         me.label = "conc"
         
-        val edge = graph.newEdge(father, me)
+        graph.newEdge(father, me)
         
         repetitions.forEach { it.toGv(me) }
     }
@@ -51,7 +51,6 @@ class RuleTreeDrawer(
                 is ElementLeaf -> element.toGv(me)
                 is GroupNode -> element.toGv(me)
                 is RuleNode -> element.toGv(me)
-                else -> throw Exception("Unreachable")
             }
         }
         
@@ -70,7 +69,7 @@ class RuleTreeDrawer(
     
     private fun ElementLeaf.toGv(father: GVNode) {
         val me = graph.newNode()
-        val edge = graph.newEdge(father, me)
+        graph.newEdge(father, me)
         
         me.fillColor = "orange"
         me.shape = "box"
@@ -85,7 +84,7 @@ class RuleTreeDrawer(
     private fun GroupNode.toGv(father: GVNode) {
         val me = graph.newNode()
         me.shape = "box"
-        val edge = graph.newEdge(father, me)
+        graph.newEdge(father, me)
         
         if (gElementNode.isOption) {
             me.label = "option${gElementNode.id}"

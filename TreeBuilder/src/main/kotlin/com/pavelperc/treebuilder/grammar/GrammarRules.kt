@@ -130,37 +130,25 @@ class GenericRepetition(
     }
     
     
-    /** Возвращает gElement, проверяя, что это не лист, а узел*/
-    val gElementNode: GenericElementNode
-        get() =
-            if (gElement is GenericElementNode)
-                gElement as GenericElementNode
-            else
-                throw Exception("Can not get gElement with gAlteration.")
+//    /** Возвращает gElement, проверяя, что это не лист, а узел*/
+//    val gElementNode: GenericElementNode
+//        get() =
+//            if (gElement is GenericElementNode)
+//                gElement as GenericElementNode
+//            else
+//                throw Exception("Can not get gElement with gAlteration.")
+//    
+//    val gElementLeaf: GenericElementLeaf
+//        get() =
+//            if (gElement is GenericElementLeaf)
+//                gElement as GenericElementLeaf
+//            else
+//                throw Exception("Can not get gElement with text.")
     
-    val gElementLeaf: GenericElementLeaf
-        get() =
-            if (gElement is GenericElementLeaf)
-                gElement as GenericElementLeaf
-            else
-                throw Exception("Can not get gElement with text.")
-    
+    /** If this value is defined, it shows, that somewhere it has been checked, that
+     * all the branch below (including other rules) can be omitted while choosing alternatives.
+     * For example, it has all optional or mult leaves.*/
     var cachedIsOptional: Boolean? = null
-    
-//    /** checks if this is a list*/
-//    // A PROBLEM WITH CHECKING NEXT RULES AFTER ParserRule Leaves
-//    val isOptional: Boolean by lazy {
-//        if (isMult || gElement.isOption)
-//            true
-//        else if (gElement is GenericElementLeaf)
-//            false
-//        else
-//            (gElement as GenericElementNode)
-//                    .gAlteration
-//                    .gConcatenations
-//                    .flatMap { it.gRepetitions }
-//                    .all { it.isOptional }
-//    }
     
     val positionInFather: Int by lazy {
         father.gRepetitions.indexOf(this)
@@ -171,7 +159,7 @@ class GenericRepetition(
     
 }
 
-abstract class GenericElement(
+sealed class GenericElement(
         val elementType: ElementType
 ) {
     

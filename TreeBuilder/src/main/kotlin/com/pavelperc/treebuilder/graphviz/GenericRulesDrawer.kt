@@ -50,7 +50,7 @@ class GenericRulesDrawer(
             val node = graph.newNode()
             node.label = "rep$pos"
             
-            val edge = graph.newEdge(me, node);
+            graph.newEdge(me, node);
             
             if (repetition.repetitive == GenericRepetition.Repetitive.MULT)
                 node.label += "*"
@@ -65,7 +65,7 @@ class GenericRulesDrawer(
         with(gElement) {
             // el node
             val node = graph.newNode()
-            val edge = graph.newEdge(me, node)
+            graph.newEdge(me, node)
             
             if (this is GenericElementLeaf) {
                 node.label = text
@@ -94,7 +94,7 @@ class GenericRulesDrawer(
         
         // alt node
         val node = graph.newNode()
-        val edge = graph.newEdge(me, node)
+        graph.newEdge(me, node)
         
         node.label = "alt"
         

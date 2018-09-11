@@ -1,5 +1,6 @@
 package com.pavelperc.treebuilder.grammar
 
+import com.pavelperc.dropInd
 import com.pavelperc.treebuilder.Grammars
 import org.amshove.kluent.*
 import org.junit.Test
@@ -19,9 +20,6 @@ class GrammarRulesTest {
         println(ruleMap.values.joinToString("\n"))
         
     }
-    
-    private fun <T> List<T>.takeInd(vararg indices: Int) = filterIndexed { index, t -> indices.contains(index) }
-    private fun <T> List<T>.dropInd(vararg indices: Int) = filterIndexed { index, t -> !indices.contains(index) }
     
     /**
      * Checks the content of the created ruleMap from custom grammar string

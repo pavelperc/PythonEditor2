@@ -11,7 +11,7 @@ class Tree(
 }
 
 
-abstract class Element(
+sealed class Element(
         var father: Repetition? = null
 )
 
@@ -40,7 +40,7 @@ class ElementLeaf(
                 "${gElement.text}($text)"
 }
 
-abstract class ElementNode(
+sealed class ElementNode(
         val gAlteration: GenericAlteration,
         father: Repetition? = null
 ) : Element(father) {

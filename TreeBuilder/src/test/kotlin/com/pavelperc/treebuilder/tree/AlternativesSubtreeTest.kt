@@ -1,5 +1,6 @@
 package com.pavelperc.treebuilder.tree
 
+import com.pavelperc.takeInd
 import com.pavelperc.treebuilder.grammar.MyVisitor
 import com.pavelperc.treebuilder.graphviz.GenericRulesDrawer
 import com.pavelperc.treebuilder.graphviz.Graph
@@ -25,7 +26,7 @@ class AlternativesSubtreeTest {
             complex_stmt: 'if' (TRUE | FALSE) ':' NEWLINE (TAB stmt NEWLINE)+
         """.trimIndent()
         val ruleMap = MyVisitor.generateRuleMap(grammarStr)
-        GenericRulesDrawer(ruleMap, 
+        GenericRulesDrawer(ruleMap,
                 Graph("chains/testNodeCreationTest.gv", grammarStr, 30)).drawGv()
     }
     
@@ -66,6 +67,38 @@ class AlternativesSubtreeTest {
         
         nameNode.revSequence.toList() shouldEqual listOf(nameNode, simpleStmtNode, stmtNode)
     }
+    
+    
+    @Test
+    fun getAvailableLeavesTest() {
+        val ruleMap = MyVisitor.generateRuleMap("""
+            a: X X | b X
+            # not opt
+            b: c+ X X | [X] X
+            # opt
+            c: (X | X)*
+        """.trimIndent())
+        
+        val a = ruleMap["a"]!!
+        val b = ruleMap["b"]!!
+        val c = ruleMap["c"]!!
+        
+        
+        AlternativesSubtree.getAvailableLeaves(a, ruleMap) shouldEqual
+                a.allLeaves.takeInd(0, 2).toList()
+        
+        AlternativesSubtree.getAvailableLeaves(b, ruleMap) shouldEqual
+                b.allLeaves.takeInd(0, 1, 3, 4).toList()
+        
+        AlternativesSubtree.getAvailableLeaves(c, ruleMap) shouldEqual
+                c.allLeaves.takeInd(0, 1).toList()
+        
+        
+        
+    }
+    
+    
+    
     
     @Test
     fun generateTreeTest() {

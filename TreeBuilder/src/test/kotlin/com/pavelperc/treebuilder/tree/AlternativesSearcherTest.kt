@@ -75,6 +75,11 @@ class AlternativesSearcherTest {
         AlternativesSearcher.gAltIsOptional(d.gAlteration, ruleMap) shouldBe true
         AlternativesSearcher.gAltIsOptional(e.gAlteration, ruleMap) shouldBe false
         AlternativesSearcher.gAltIsOptional(f.gAlteration, ruleMap) shouldBe true
+        
+        a.gAlteration.allElements.any { it.father.cachedIsOptional != null } shouldBe true
+        f.gAlteration.allElements.forEach { it.father.cachedIsOptional shouldNotBe null }
+        
+        
     }
     
     
@@ -100,9 +105,9 @@ class AlternativesSearcherTest {
         
         AlternativesSearcher.gAltIsOptional(n.gAlteration, ruleMap) shouldBe true
         AlternativesSearcher.gAltIsOptional(m.gAlteration, ruleMap) shouldBe true
-        
-        
-        
+    
+        g.gAlteration.allElements.forEach { it.father.cachedIsOptional shouldBe false }
+    
     }
     
     @Test
