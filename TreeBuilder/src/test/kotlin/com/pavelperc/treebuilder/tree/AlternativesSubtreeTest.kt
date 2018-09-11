@@ -1,6 +1,8 @@
 package com.pavelperc.treebuilder.tree
 
 import com.pavelperc.treebuilder.grammar.MyVisitor
+import com.pavelperc.treebuilder.graphviz.GenericRulesDrawer
+import com.pavelperc.treebuilder.graphviz.Graph
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldEqual
 import org.junit.Assert.*
@@ -9,6 +11,23 @@ import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 
 class AlternativesSubtreeTest {
+    
+    
+    @Test
+    fun drawGrammar() {
+        val grammarStr = """
+            file_input: (NEWLINE | stmt)* ENDMARKER
+            stmt: simple_stmt | complex_stmt
+            simple_stmt: NAME ('=' | augassign) expr
+            augassign: '+=' | '-=' | '*=' | '/='
+            expr: NUM sign NUM
+            sign: '+' | '-'
+            complex_stmt: 'if' (TRUE | FALSE) ':' NEWLINE (TAB stmt NEWLINE)+
+        """.trimIndent()
+        val ruleMap = MyVisitor.generateRuleMap(grammarStr)
+        GenericRulesDrawer(ruleMap, 
+                Graph("chains/testNodeCreationTest.gv", grammarStr, 30)).drawGv()
+    }
     
     
     operator fun <T> Sequence<T>.get(i: Int) = elementAt(i)
@@ -28,9 +47,6 @@ class AlternativesSubtreeTest {
         val file_input = ruleMap["file_input"]!!
         val stmt = ruleMap["stmt"]!!
         val simple_stmt = ruleMap["simple_stmt"]!!
-        val augassign = ruleMap["augassign"]!!
-        val expr = ruleMap["expr"]!!
-        val sign = ruleMap["sign"]!!
         
         
         val newLineNode = AlternativesSubtree.Node(null, file_input.allLeaves[0])
@@ -49,6 +65,11 @@ class AlternativesSubtreeTest {
         val nameNode = AlternativesSubtree.Node(simpleStmtNode, simple_stmt.allLeaves[0])
         
         nameNode.revSequence.toList() shouldEqual listOf(nameNode, simpleStmtNode, stmtNode)
+    }
+    
+    @Test
+    fun generateTreeTest() {
+        
     }
     
 }

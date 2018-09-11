@@ -39,7 +39,7 @@
 //
 //class Alteration(
 //        val gAlteration: GenericAlteration,
-//        /** null for root*/
+//        /** null for rootRule*/
 //        var father: Element?,
 //        val rule: RealizedRule
 //) {

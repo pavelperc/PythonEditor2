@@ -2,35 +2,37 @@ package com.pavelperc.treebuilder.graphviz
 
 import com.pavelperc.treebuilder.grammar.*
 
-object GenericRulesDrawer {
+class GenericRulesDrawer(
+        val ruleMap: RuleMap,
+        val graph: Graph
+) {
     
-    fun drawGv(ruleMap: RuleMap, fileName: String, graphLabel: String) {
-        val graph = Graph(fileName, graphLabel)
-        ruleMap.toGv(graph)
+    fun drawGv() {
+        ruleMap.toGv()
         graph.writeToFile()
     }
     
-    private fun RuleMap.toGv(graph: Graph) {
+    private fun RuleMap.toGv() {
         for (rule in values) {
             val node = graph.newNode()
             node.label = rule.id
             
-            rule.toGv(graph, node)
+            rule.toGv(node)
         }
     }
     
     
-    private fun GenericRule.toGv(graph: Graph, me: GVNode) {
+    private fun GenericRule.toGv(me: GVNode) {
         // alt node
         val node = graph.newNode()
         node.label = "alt"
     
         graph.newEdge(me, node);
         
-        gAlteration.toGv(graph, node)
+        gAlteration.toGv(node)
     }
     
-    private fun GenericAlteration.toGv(graph: Graph, me: GVNode) {
+    private fun GenericAlteration.toGv(me: GVNode) {
         
         
         for (conc in gConcatenations) {
@@ -38,11 +40,11 @@ object GenericRulesDrawer {
             val node = graph.newNode()
             node.label = "conc"
             graph.newEdge(me, node)
-            conc.toGv(graph, node)
+            conc.toGv(node)
         }
     }
     
-    private fun GenericConcatenation.toGv(graph: Graph, me: GVNode) {
+    private fun GenericConcatenation.toGv(me: GVNode) {
         for ((pos, repetition) in gRepetitions.withIndex()) {
             // rep node
             val node = graph.newNode()
@@ -55,11 +57,11 @@ object GenericRulesDrawer {
             else if (repetition.repetitive == GenericRepetition.Repetitive.PLUS)
                 node.label += "+"
             
-            repetition.toGv(graph, node)
+            repetition.toGv(node)
         }
     }
     
-    private fun GenericRepetition.toGv(graph: Graph, me: GVNode) {
+    private fun GenericRepetition.toGv(me: GVNode) {
         with(gElement) {
             // el node
             val node = graph.newNode()
@@ -82,11 +84,11 @@ object GenericRulesDrawer {
             } else if (isId || isString) {
                 node.fillColor = "orange"
             }
-            this.toGv(graph, node)
+            this.toGv(node)
         }
     }
     
-    private fun GenericElement.toGv(graph: Graph, me: GVNode) {
+    private fun GenericElement.toGv(me: GVNode) {
         if (this !is GenericElementNode)
             return
         
@@ -96,7 +98,7 @@ object GenericRulesDrawer {
         
         node.label = "alt"
         
-        gAlteration.toGv(graph, node)
+        gAlteration.toGv(node)
     }
     
 }

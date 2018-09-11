@@ -1,6 +1,7 @@
 package com.pavelperc.treebuilder.grammar
 
 import com.pavelperc.treebuilder.*
+import com.pavelperc.treebuilder.tree.ElementNode
 
 /**
  * Вершина для хранения любого грамматического правила.
@@ -33,7 +34,6 @@ class GenericRule(
                 .map { it as GenericElementNode }
                 .forEach { it.gAlteration.fillGRuleRec(newRule) }
     }
-    
     
     
     /** all leaf elements under this rule*/
@@ -74,7 +74,7 @@ class GenericAlteration(
         get() = gConcatenations.flatMap { it.gRepetitions.map { it.gElement } }
     
     /** all leaf elements under this alteration*/
-    val allLeaves:Sequence<GenericElementLeaf>
+    val allLeaves: Sequence<GenericElementLeaf>
         get() = gConcatenations.asSequence().flatMap { it.gRepetitions.asSequence().flatMap { it.gElement.allLeaves } }
     
     override fun toString() = gConcatenations.joinToString(" | ")
@@ -144,6 +144,23 @@ class GenericRepetition(
                 gElement as GenericElementLeaf
             else
                 throw Exception("Can not get gElement with text.")
+    
+    var cachedIsOptional: Boolean? = null
+    
+//    /** checks if this is a list*/
+//    // A PROBLEM WITH CHECKING NEXT RULES AFTER ParserRule Leaves
+//    val isOptional: Boolean by lazy {
+//        if (isMult || gElement.isOption)
+//            true
+//        else if (gElement is GenericElementLeaf)
+//            false
+//        else
+//            (gElement as GenericElementNode)
+//                    .gAlteration
+//                    .gConcatenations
+//                    .flatMap { it.gRepetitions }
+//                    .all { it.isOptional }
+//    }
     
     val positionInFather: Int by lazy {
         father.gRepetitions.indexOf(this)

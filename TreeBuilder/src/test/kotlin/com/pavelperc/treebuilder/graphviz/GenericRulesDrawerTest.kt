@@ -10,7 +10,8 @@ class GenericRulesDrawerTest {
     @Test
     fun drawFullGrammarGw() {
         val ruleMap = Grammars.parseFullGrammar()
-        GenericRulesDrawer.drawGv(ruleMap, "chains/DrawFullGrammarTest.gv", "original rules: ${ruleMap.size}")
+        GenericRulesDrawer(ruleMap,
+                Graph("chains/DrawFullGrammarTest.gv", "original rules: ${ruleMap.size}")).drawGv()
         
     }
 }

@@ -86,7 +86,7 @@ class Graph(val fileName:String, val graphLabel: String = fileName, val fontsize
         var ans = "digraph G {\n"
         ans += "labelloc=\"t\";"
         ans += "fontsize=$fontsize;"
-        ans += "label=\"$graphLabel\";\n"
+        ans += "label=\"${graphLabel.replace("\n", "\\l")}\";\n"
         //        ans += "graph [ dpi = 300 ];\n";
         
         
