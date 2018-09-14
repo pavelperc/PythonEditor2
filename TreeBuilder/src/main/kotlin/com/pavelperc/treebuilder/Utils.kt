@@ -1,4 +1,4 @@
-package com.pavelperc
+package com.pavelperc.treebuilder
 
 public inline fun <T> Iterable<T>.takeWhileIncl(predicate: (T) -> Boolean): List<T> {
     val list = ArrayList<T>()

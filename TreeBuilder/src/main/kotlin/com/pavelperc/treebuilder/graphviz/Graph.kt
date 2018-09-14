@@ -8,7 +8,7 @@ import java.io.PrintWriter
  * Created by pavel on 02.04.2018.
  */
 
-/** Node for GraphViz*/
+/** SuggestionNode for GraphViz*/
 class GVNode(
     val id: Int,
     var label: String = "n$id",

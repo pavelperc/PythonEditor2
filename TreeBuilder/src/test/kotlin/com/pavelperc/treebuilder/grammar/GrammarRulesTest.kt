@@ -1,6 +1,6 @@
 package com.pavelperc.treebuilder.grammar
 
-import com.pavelperc.dropInd
+import com.pavelperc.treebuilder.dropInd
 import com.pavelperc.treebuilder.Grammars
 import org.amshove.kluent.*
 import org.junit.Test
