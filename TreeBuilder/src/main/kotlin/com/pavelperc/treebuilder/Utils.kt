@@ -1,5 +1,7 @@
 package com.pavelperc.treebuilder
 
+
+/** The version of takeWhile, which includes first invalid element if it exists.*/
 public inline fun <T> Iterable<T>.takeWhileIncl(predicate: (T) -> Boolean): List<T> {
     val list = ArrayList<T>()
     for (item in this) {

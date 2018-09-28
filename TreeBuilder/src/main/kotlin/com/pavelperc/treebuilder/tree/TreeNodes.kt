@@ -13,7 +13,12 @@ class Tree(
 
 sealed class Element(
         var father: Repetition? = null
-)
+) {
+    /**Throws Exception in case of null father*/
+    val positionInFather: Int
+        get() = father?.elements?.indexOf(this)
+                ?: throw Exception("Can not find position in father for $this, because the father is null")
+}
 
 
 /** Leaf of the Syntax tree. Represents string consts like '=' or lexer rules like NUMBER.*/
@@ -138,6 +143,9 @@ class Repetition(
     
     val rightRep: Repetition?
         get() = father.repetitions.getOrNull(positionInFather + 1)
+    
+    val rightReps: Sequence<Repetition>// do not remove getter!
+        get() = generateSequence(rightRep) { it.rightRep }
 }
 
 

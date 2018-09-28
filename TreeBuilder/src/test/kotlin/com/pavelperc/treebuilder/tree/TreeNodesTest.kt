@@ -58,6 +58,7 @@ class TreeNodesTest {
     
     /** choose one conc among alternatives in gAlteration */
     
+    /** Test property element.conc*/
     @Test
     fun singleConcInElementTest() {
         val ruleMap = MyVisitor.generateRuleMap("""

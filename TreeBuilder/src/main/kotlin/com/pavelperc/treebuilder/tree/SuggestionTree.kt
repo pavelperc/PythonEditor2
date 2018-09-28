@@ -88,7 +88,7 @@ class SuggestionTree private constructor(
         return leaves.map { RepAttachable(repToAttach, posInRep, it, elementCreator) }
     }
     
-    
+    // TODO move all attachables to AlternativesSearcher class
     private class ElemNodeAttachable(
             private val elementNode: ElementNode,
             private val leafSuggestion: SuggestionNode,
