@@ -1,6 +1,5 @@
 package com.pavelperc.treebuilder.tree
 
-import com.pavelperc.treebuilder.grammar.GenericElement
 import com.pavelperc.treebuilder.grammar.MyVisitor
 import com.pavelperc.treebuilder.takeInd
 import org.amshove.kluent.*
@@ -124,21 +123,46 @@ class AlternativesSearcherTest {
     
     @Test
     fun findAlternativesTest() {
-        val ruleMap = MyVisitor.generateRuleMap("""
-            stmt: NAME '=' NUM (sign NUM)* END
+        val grammarStr = """
+            file_input: (NEWLINE | stmt)* ENDMARKER
+            stmt: simple_stmt | complex_stmt
+            simple_stmt: NAME ('=' | augassign) expr NEWLINE
+            augassign: '+=' | '-=' | '*=' | '/='
+            expr: NUM (sign NUM)*
             sign: '+' | '-'
-        """.trimIndent())
-        
-        val cursor: ElementLeaf? = null
-        
-        val rootGRule = ruleMap["stmt"]!!
-        
-//        val alternatives = AlternativesSearcher.findAlternatives(cursor)
+            complex_stmt: 'if' (TRUE | FALSE) ':' NEWLINE (TAB stmt NEWLINE)+
+        """.trimIndent()
+        val ruleMap = MyVisitor.generateRuleMap(grammarStr)
         
         
-        // ...
+        val gRoot = ruleMap["stmt"]!!
+        val root = RuleNode(gRoot)
+        val elementCreator = ElementCreator(ruleMap)
+    
+    
+        var attachables = AlternativesSearcher.findAlternativesFromRoot(root, ruleMap, elementCreator)
+        attachables.map { it.gLeaf.text } shouldEqual listOf("NAME", "if")
+        var cursor = attachables[0].attachMe() // NAME
+    
+        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables.map { it.gLeaf.text } shouldEqual listOf("=", "+=", "-=", "*=", "/=")
+        cursor = attachables[1].attachMe() // '+='
         
-        // hanging on NUM
+        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables.map { it.gLeaf.text } shouldEqual listOf("NUM")
+        cursor = attachables[0].attachMe() // NUM
+        
+        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables.map { it.gLeaf.text } shouldEqual listOf("+", "-", "NEWLINE")
+        cursor = attachables[1].attachMe() // '-'
+        
+        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables.map { it.gLeaf.text } shouldEqual listOf("NUM")
+        cursor = attachables[0].attachMe() // 'NUM'
+        
+        
+        
+        
         
         
     }

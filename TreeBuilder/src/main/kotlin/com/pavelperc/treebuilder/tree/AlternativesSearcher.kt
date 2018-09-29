@@ -108,6 +108,7 @@ object AlternativesSearcher {
         }.flatten()
     }
     
+    // TODO comments
     fun findAlternativesFromRoot(root: RuleNode, ruleMap: RuleMap, elementCreator: ElementCreator): List<Attachable> {
         val st = SuggestionTree.generateTree(root.gAlteration, ruleMap)
         

@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 class SuggestionTreeTest {
     
     
-    @Test
+//    @Test
     fun drawGrammar() {
         val grammarStr = """
             file_input: (NEWLINE | stmt)* ENDMARKER
