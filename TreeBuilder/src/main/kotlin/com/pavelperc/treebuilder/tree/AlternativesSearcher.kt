@@ -173,10 +173,13 @@ object AlternativesSearcher {
                     .reversed()
             
             
+//            return altChoices.fold(firstElemNode as Element) { acc, concPos ->
+//                elementCreator.fromRepetition((acc as ElementNode).chooseConc(concPos).repetitions[0])
+//            } as ElementLeaf
+            
             // build elements, using elementCreator and chosen conc positions.
-            val rep = firstElemNode.chooseConc(altChoices[0]).repetitions[0]
-            var element = elementCreator.fromRepetition(rep)
-            altChoices.asSequence().drop(1).forEach { concPos ->
+            var element: Element = firstElemNode
+            altChoices.forEach { concPos ->
                 val rep = (element as ElementNode).chooseConc(concPos).repetitions[0]
                 element = elementCreator.fromRepetition(rep)
             }
