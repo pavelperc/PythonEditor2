@@ -86,7 +86,7 @@ sealed class ElementNode(
      * If the conc with the given [position] is already chosen - does nothing.
      * @return chosen conc
      * */
-    fun chooseConc(position: Int = 0): Concatenation {
+    fun chooseConc(position: Int): Concatenation {
         // TODO chooseConc: handle multichoosing
         
         if (position < 0 || position >= gAlteration.gConcatenations.size) {

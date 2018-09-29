@@ -153,7 +153,7 @@ class TreeNodesTest {
         conc.repetitions[3].elements shouldEqual listOf(group2, group1)
         
         
-        val group1Conc = group1.chooseConc()
+        val group1Conc = group1.chooseConc(0)
         
         val sign = elemCreator.fromRepetition(group1Conc.repetitions[0]) as RuleNode
         

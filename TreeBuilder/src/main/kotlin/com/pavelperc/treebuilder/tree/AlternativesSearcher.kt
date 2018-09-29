@@ -73,7 +73,7 @@ object AlternativesSearcher {
             }
             
             var foundNonOptional = false
-            father.rightReps.asIterable()
+            father.rightReps
                     .takeWhileIncl {
                         foundNonOptional = !gRepIsOptional(it.gRep, ruleMap)
                         !foundNonOptional
@@ -91,13 +91,133 @@ object AlternativesSearcher {
         
         return result
     }
-//    fun searchRuleStacks(gElement: GenericElement):List<RuleStack> {
-//        if (gElement is GenericElementLeaf && !gElement.isParserRuleId) {
-//            return listOf(RuleStack(gElement, gElement))
-//        }
-//        
-//        
-//    }
+    
+    fun findAlternatives(cursor: Element, ruleMap: RuleMap, elementCreator: ElementCreator): List<Attachable> {
+        val insertionPoints = findAllInsertionPoints(cursor, ruleMap)
+        
+        return insertionPoints.map { (rep, pos) ->
+            val gElement = rep.gRep.gElement
+            when (gElement) {
+                is GenericElementNode -> {
+                    val st = SuggestionTree.generateTree(gElement.gAlteration, ruleMap)
+                    st.leaves.map { RepAttachable(rep, pos, it, elementCreator) }
+                }
+                is GenericElementLeaf ->
+                    listOf(LeafAttachable(rep, pos, elementCreator, gElement))
+            }
+        }.flatten()
+    }
+    
+    fun findAlternativesFromRoot(root: RuleNode, ruleMap: RuleMap, elementCreator: ElementCreator): List<Attachable> {
+        val st = SuggestionTree.generateTree(root.gAlteration, ruleMap)
+        
+        return st.leaves.map { ElemNodeAttachable(root, it, elementCreator) }
+    }
+    
+    /**
+     * Attaches [gLeaf] to [repToAttach] in pos [posInRep] using [elementCreator].
+     * [gLeaf] should be the child of [repToAttach]
+     */
+    private class LeafAttachable(
+            private val repToAttach: Repetition,
+            private val posInRep: Int,
+            val elementCreator: ElementCreator,
+            override val gLeaf: GenericElementLeaf
+    ) : Attachable {
+        
+        init {
+            if (repToAttach.gRep.gElement != gLeaf) {
+                throw IllegalArgumentException("LeafAttachable: gLeaf $gLeaf id not an repToAttach $repToAttach child ")
+            }
+        }
+        
+        override fun attachMe(): ElementLeaf {
+            return elementCreator.fromRepetition(repToAttach, posInRep) as ElementLeaf
+        }
+    }
+    
+    /**
+     * Attaches a branch of the SuggestionTree, starting from [leafSuggestion], to [firstElemNode], using [elementCreator].
+     * [leafSuggestion] root should be in the same branch as [firstElemNode].
+     * [leafSuggestion] shouldn't have a parserRule gLeaf.
+     * */
+    private class ElemNodeAttachable(
+            private val firstElemNode: ElementNode,
+            private val leafSuggestion: SuggestionNode,
+            private val elementCreator: ElementCreator
+    ) : Attachable {
+        init {
+            if (leafSuggestion.gLeaf.isParserRuleId) {
+                throw IllegalArgumentException("ElemNodeAttachable: SuggestionNode $leafSuggestion is a parserRuleId")
+            }
+        }
+        
+        override val gLeaf: GenericElementLeaf get() = leafSuggestion.gLeaf
+        
+        override fun attachMe(): ElementLeaf {
+            val firstGAlt = firstElemNode.gAlteration
+            
+            // go up the SuggestionNodes and remember all choices in gAlts
+            val altChoices = leafSuggestion.revSequence
+                    .map { it.gLeaf }
+                    .flatMap { gLeaf ->
+                        // generating a reversed sequence of gConcs for each SuggestionNode
+                        generateSequence(gLeaf.father.father) { it.father.father?.father?.father }
+                    }
+                    .takeWhileIncl { gConc ->
+                        // stop when we got first gAlt after our rep
+                        gConc.father != firstGAlt
+                    }
+                    .map { it.positionInFather }
+                    .toList()
+                    .reversed()
+            
+            
+            // build elements, using elementCreator and chosen conc positions.
+            val rep = firstElemNode.chooseConc(altChoices[0]).repetitions[0]
+            var element = elementCreator.fromRepetition(rep)
+            altChoices.asSequence().drop(1).forEach { concPos ->
+                val rep = (element as ElementNode).chooseConc(concPos).repetitions[0]
+                element = elementCreator.fromRepetition(rep)
+            }
+            
+            return element as ElementLeaf
+        }
+    }
+    
+    
+    /**
+     * Attaches a branch of the SuggestionTree, starting from [leafSuggestion], to [repToAttach], using [elementCreator].
+     * [leafSuggestion] root should be in the same branch as the child element of [repToAttach].
+     * [leafSuggestion] shouldn't have a parserRule gLeaf.
+     * [repToAttach] shouldn't have gElement, which is LexerRuleId ot String const
+     * */
+    private class RepAttachable(
+            private val repToAttach: Repetition,
+            private val posInRep: Int,
+            private val leafSuggestion: SuggestionNode,
+            private val elementCreator: ElementCreator
+    ) : Attachable {
+        init {
+            if (leafSuggestion.gLeaf.isParserRuleId) {
+                throw IllegalArgumentException("SuggestionNode $leafSuggestion is a parserRuleId")
+            }
+            
+            if (repToAttach.gRep.gElement.isLexerRuleId || repToAttach.gRep.gElement.isString) {
+                throw IllegalArgumentException("RepAttachable: repToAttach's child is lexerRuleId or string const!")
+            }
+        }
+        
+        override val gLeaf: GenericElementLeaf
+            get() = leafSuggestion.gLeaf
+        
+        override fun attachMe(): ElementLeaf {
+            val firstElemNode = elementCreator.fromRepetition(repToAttach, posInRep) as ElementNode
+            // do through ElemNodeAttachable with new created element
+            val elemNodeAttachable = ElemNodeAttachable(firstElemNode, leafSuggestion, elementCreator)
+            return elemNodeAttachable.attachMe()
+        }
+    }
     
     
 }

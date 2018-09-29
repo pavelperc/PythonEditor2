@@ -95,6 +95,9 @@ class GenericConcatenation(
     
     /** Отец заполняется в конструкторе gAlt*/
     lateinit var father: GenericAlteration
+    val positionInFather: Int by lazy {
+        father.gConcatenations.indexOf(this)
+    }
     
     override fun toString() = gRepetitions.joinToString(" ")
     

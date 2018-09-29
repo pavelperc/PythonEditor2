@@ -6,7 +6,7 @@ import com.pavelperc.treebuilder.grammar.*
 
 interface Attachable {
     val gLeaf: GenericElementLeaf
-    fun attachMe()
+    fun attachMe(): ElementLeaf
 }
 
 
@@ -73,58 +73,4 @@ class SuggestionTree private constructor(
         
         
     } // end of companion
-    
-    fun getAttachablesFromElementNode(elementNode: ElementNode, elementCreator: ElementCreator): List<Attachable> {
-        if (gAltRoot != elementNode.gAlteration)
-            throw IllegalArgumentException("ElementNode $elementNode doesn't match $gAltRoot")
-        
-        return leaves.map { ElemNodeAttachable(elementNode, it, elementCreator) }
-    }
-    
-    fun getAttachablesFromRep(repToAttach: Repetition, posInRep: Int, elementCreator: ElementCreator): List<Attachable> {
-        if (gAltRoot != (repToAttach.gRep.gElement as? GenericElementNode)?.gAlteration)
-            throw IllegalArgumentException("Repetition $repToAttach child doesn't match gAltRoot $gAltRoot")
-        
-        return leaves.map { RepAttachable(repToAttach, posInRep, it, elementCreator) }
-    }
-    
-    // TODO move all attachables to AlternativesSearcher class
-    private class ElemNodeAttachable(
-            private val elementNode: ElementNode,
-            private val leafSuggestion: SuggestionNode,
-            val elementCreator: ElementCreator
-    ) : Attachable {
-        init {
-            if (leafSuggestion.gLeaf.isParserRuleId) {
-                throw IllegalArgumentException("SuggestionNode $leafSuggestion is a parserRuleId")
-            }
-        }
-        
-        override val gLeaf: GenericElementLeaf
-            get() = leafSuggestion.gLeaf
-        
-        override fun attachMe() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    }
-    
-    private class RepAttachable(
-            private val repToAttach: Repetition,
-            private val posInRep: Int,
-            private val leafSuggestion: SuggestionNode,
-            val elementCreator: ElementCreator
-    ) : Attachable {
-        init {
-            if (leafSuggestion.gLeaf.isParserRuleId) {
-                throw IllegalArgumentException("SuggestionNode $leafSuggestion is a parserRuleId")
-            }
-        }
-        
-        override val gLeaf: GenericElementLeaf
-            get() = leafSuggestion.gLeaf
-        
-        override fun attachMe() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    }
 }

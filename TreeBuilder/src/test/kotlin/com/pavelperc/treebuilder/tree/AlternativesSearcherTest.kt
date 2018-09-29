@@ -37,7 +37,7 @@ class AlternativesSearcherTest {
     
     
             val group1 = elemCreator.fromRepetition(conc.repetitions[3]) as GroupNode
-            val group1Conc = group1.chooseConc()
+            val group1Conc = group1.chooseConc(0)
             val sign = elemCreator.fromRepetition(group1Conc.repetitions[0]) as RuleNode
     
             val signConc = sign.chooseConc(0) // choose plus
