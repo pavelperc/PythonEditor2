@@ -97,13 +97,19 @@ object AlternativesSearcher {
         
         return insertionPoints.map { (rep, pos) ->
             val gElement = rep.gRep.gElement
-            when (gElement) {
-                is GenericElementNode -> {
-                    val st = SuggestionTree.generateTree(gElement.gAlteration, ruleMap)
-                    st.leaves.map { RepAttachable(rep, pos, it, elementCreator) }
+            
+            if (gElement.isLexerRuleId || gElement.isString) {
+                // lexer rule or const string
+                listOf(LeafAttachable(rep, pos, elementCreator, gElement as GenericElementLeaf))
+            } else {
+                // parser rule, group or option
+                val childAlteration = when (gElement) {
+                    is GenericElementLeaf -> ruleMap[gElement.text]!!.gAlteration
+                    is GenericElementNode -> gElement.gAlteration
                 }
-                is GenericElementLeaf ->
-                    listOf(LeafAttachable(rep, pos, elementCreator, gElement))
+                
+                val st = SuggestionTree.generateTree(childAlteration, ruleMap)
+                st.leaves.map { RepAttachable(rep, pos, it, elementCreator) }
             }
         }.flatten()
     }
@@ -172,8 +178,8 @@ object AlternativesSearcher {
                     .map { it.positionInFather }
                     .toList()
                     .reversed()
-            
-            
+
+
 //            return altChoices.fold(firstElemNode as Element) { acc, concPos ->
 //                elementCreator.fromRepetition((acc as ElementNode).chooseConc(concPos).repetitions[0])
 //            } as ElementLeaf

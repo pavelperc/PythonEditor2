@@ -146,6 +146,8 @@ class Repetition(
     
     val rightReps: Sequence<Repetition>// do not remove getter!
         get() = generateSequence(rightRep) { it.rightRep }
+    
+    override fun toString() = "rep(gRep.gElement=${gRep.gElement})"
 }
 
 
