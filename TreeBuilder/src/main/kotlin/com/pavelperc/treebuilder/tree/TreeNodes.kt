@@ -3,13 +3,6 @@ package com.pavelperc.treebuilder.tree
 import com.pavelperc.treebuilder.exception.MultichoiceNotHandledException
 import com.pavelperc.treebuilder.grammar.*
 
-class Tree(
-        val ruleMap: RuleMap,
-        gRoot: GenericRule,
-        val elementCreator: ElementCreator
-) {
-}
-
 
 sealed class Element(
         var father: Repetition? = null

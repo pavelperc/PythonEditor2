@@ -144,19 +144,19 @@ class AlternativesSearcherTest {
         attachables.map { it.gLeaf.text } shouldEqual listOf("NAME", "if")
         var cursor = attachables[0].attachMe() // NAME
     
-        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables = AlternativesSearcher.findAlternativesFromCursor(cursor, ruleMap, elementCreator)
         attachables.map { it.gLeaf.text } shouldEqual listOf("=", "+=", "-=", "*=", "/=")
         cursor = attachables[1].attachMe() // '+='
         
-        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables = AlternativesSearcher.findAlternativesFromCursor(cursor, ruleMap, elementCreator)
         attachables.map { it.gLeaf.text } shouldEqual listOf("NUM")
         cursor = attachables[0].attachMe() // NUM
         
-        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables = AlternativesSearcher.findAlternativesFromCursor(cursor, ruleMap, elementCreator)
         attachables.map { it.gLeaf.text } shouldEqual listOf("+", "-", "NEWLINE")
         cursor = attachables[1].attachMe() // '-'
         
-        attachables = AlternativesSearcher.findAlternatives(cursor, ruleMap, elementCreator)
+        attachables = AlternativesSearcher.findAlternativesFromCursor(cursor, ruleMap, elementCreator)
         attachables.map { it.gLeaf.text } shouldEqual listOf("NUM")
         cursor = attachables[0].attachMe() // 'NUM'
         

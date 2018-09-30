@@ -92,7 +92,14 @@ object AlternativesSearcher {
         return result
     }
     
-    fun findAlternatives(cursor: Element, ruleMap: RuleMap, elementCreator: ElementCreator): List<Attachable> {
+    fun findAlternatives(tree: Tree) = with (tree) {
+        if (cursor != null)
+            findAlternativesFromCursor(cursor!!, ruleMap, elementCreator)
+        else
+            findAlternativesFromRoot(root, ruleMap, elementCreator)
+    }
+    
+    fun findAlternativesFromCursor(cursor: ElementLeaf, ruleMap: RuleMap, elementCreator: ElementCreator): List<Attachable> {
         val insertionPoints = findAllInsertionPoints(cursor, ruleMap)
         
         return insertionPoints.map { (rep, pos) ->
