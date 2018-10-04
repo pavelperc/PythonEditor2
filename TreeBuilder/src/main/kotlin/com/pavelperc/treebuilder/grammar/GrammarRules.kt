@@ -131,8 +131,8 @@ class GenericRepetition(
         
         override fun toString() = symbol
     }
-    
-    
+
+
 //    /** Возвращает gElement, проверяя, что это не лист, а узел*/
 //    val gElementNode: GenericElementNode
 //        get() =
@@ -250,15 +250,14 @@ class GenericElementNode(
 //        gAlteration.gRule = gRule
     }
     
-    override fun toString(): String {
-        when (elementType) {
+    override fun toString() =
+            when (elementType) {
 //                ElementType.GROUP -> return "($gAlteration)"
 //                ElementType.OPTION -> return "[$gAlteration]"
-            ElementType.GROUP -> return "group: $id"
-            ElementType.OPTION -> return "option: $id"
-            else -> throw IllegalArgumentException("unknown elementType")
-        }
-    }
+                ElementType.GROUP -> "group$id"
+                ElementType.OPTION -> "option$id"
+                else -> throw IllegalArgumentException("unknown elementType")
+            }
 }
 
 /** STRING (constant in single quotes) or ID (parser rule or grammar rule)*/

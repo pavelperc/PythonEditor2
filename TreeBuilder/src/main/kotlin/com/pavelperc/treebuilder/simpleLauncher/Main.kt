@@ -91,17 +91,17 @@ object SimpleLauncher {
     @JvmStatic
     fun main(args: Array<String>) {
         println("Working Directory = ${System.getProperty("user.dir")}")
-//        val grammarStr = FileReader("full_grammar.txt").readText()
+        val grammarStr = FileReader("full_grammar.txt").readText()
         
-        val grammarStr = """
-            file_input: (NEWLINE | stmt)* ENDMARKER
-            stmt: simple_stmt | complex_stmt
-            simple_stmt: NAME ('=' | augassign) expr NEWLINE
-            augassign: '+=' | '-=' | '*=' | '/='
-            expr: NUM (sign NUM)*
-            sign: '+' | '-'
-            complex_stmt: 'if' (TRUE | FALSE) ':' NEWLINE (TAB stmt NEWLINE)+
-        """.trimIndent()
+//        val grammarStr = """
+//            file_input: (NEWLINE | stmt)* ENDMARKER
+//            stmt: simple_stmt | complex_stmt
+//            simple_stmt: NAME ('=' | augassign) expr NEWLINE
+//            augassign: '+=' | '-=' | '*=' | '/='
+//            expr: NUM (sign NUM)*
+//            sign: '+' | '-'
+//            complex_stmt: 'if' (TRUE | FALSE) ':' NEWLINE (TAB stmt NEWLINE)+
+//        """.trimIndent()
         
         val ruleMap = MyVisitor.generateRuleMap(grammarStr)
         println("loaded grammar")

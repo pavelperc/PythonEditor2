@@ -76,5 +76,5 @@ class SuggestionTree private constructor(
     
     override fun toString() = "SuggestionTree(rev traces: ${leaves.map {
         it.revSequence.map { it.gLeaf.text }.joinToString(", ", "[", "]")
-    }.joinToString()})"
+    }.joinToString(",\n")})"
 }

@@ -92,7 +92,7 @@ object AlternativesSearcher {
         return result
     }
     
-    fun findAlternatives(tree: Tree) = with (tree) {
+    fun findAlternatives(tree: Tree) = with(tree) {
         if (cursor != null)
             findAlternativesFromCursor(cursor!!, ruleMap, elementCreator)
         else
@@ -124,7 +124,6 @@ object AlternativesSearcher {
     // TODO comments
     fun findAlternativesFromRoot(root: RuleNode, ruleMap: RuleMap, elementCreator: ElementCreator): List<Attachable> {
         val st = SuggestionTree.generateTree(root.gAlteration, ruleMap)
-        
         return st.leaves.map { ElemNodeAttachable(root, it, elementCreator) }
     }
     
@@ -170,19 +169,21 @@ object AlternativesSearcher {
         
         override fun attachMe(): ElementLeaf {
             val firstGAlt = firstElemNode.gAlteration
-            
-            // go up the SuggestionNodes and remember all choices in gAlts
+            // go up the SuggestionNodes and remember all choices in gAlts AND GCONCS!!!
             val altChoices = leafSuggestion.revSequence
                     .map { it.gLeaf }
                     .flatMap { gLeaf ->
-                        // generating a reversed sequence of gConcs for each SuggestionNode
-                        generateSequence(gLeaf.father.father) { it.father.father?.father?.father }
+                        // generating a reversed sequence of gReps for each SuggestionNode
+                        generateSequence(gLeaf.father) { it.father.father.father?.father }
                     }
-                    .takeWhileIncl { gConc ->
+                    .takeWhileIncl { gRep ->
                         // stop when we got first gAlt after our rep
-                        gConc.father != firstGAlt
+                        (gRep.father.father != firstGAlt)
                     }
-                    .map { it.positionInFather }
+                    .map { gRep ->
+                        // create a pair of positions: (gConc in gAlt and gRep in gConc)
+                        Pair(gRep.father.positionInFather, gRep.positionInFather)
+                    }
                     .toList()
                     .reversed()
 
@@ -193,8 +194,8 @@ object AlternativesSearcher {
             
             // build elements, using elementCreator and chosen conc positions.
             var element: Element = firstElemNode
-            altChoices.forEach { concPos ->
-                val rep = (element as ElementNode).chooseConc(concPos).repetitions[0]
+            altChoices.forEach { (concPos, repPos) ->
+                val rep = (element as ElementNode).chooseConc(concPos).repetitions[repPos]
                 element = elementCreator.fromRepetition(rep)
             }
             
